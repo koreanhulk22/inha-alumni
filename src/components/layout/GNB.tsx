@@ -152,12 +152,11 @@ export function GNB() {
           {/* 로고 */}
           <Link href="/" className="flex items-center gap-3 mr-8 shrink-0">
             <Image
-              src="/images/inha-emblem.png"
+              src={transparent ? "/images/inha-emblem-white.png" : "/images/inha-emblem.png"}
               alt="인하대학교 엠블럼"
               width={40}
               height={40}
               priority
-              className={transparent ? "brightness-0 invert" : ""}
             />
             <div className="hidden sm:block">
               <div className={`font-bold text-sm leading-tight whitespace-nowrap transition-colors ${transparent ? "text-white" : "text-[#003876]"}`}>
