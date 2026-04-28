@@ -33,6 +33,48 @@ const bizItems = [
   { label: "창업지원", desc: "동문 창업 네트워크", href: "/business/startup", bg: "bg-[#555]" },
 ];
 
+function DonationDashboard() {
+  const funds = [
+    { label: "회비발전기금", current: 68 },
+    { label: "장학기금", current: 45 },
+    { label: "동문회관 건립기금", current: 23 },
+  ];
+  return (
+    <section className="bg-[#003876] py-12 md:py-16">
+      <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+        <div>
+          <p className="text-[#C8A951] text-xs font-semibold tracking-widest uppercase mb-2">Donate &amp; Membership</p>
+          <h2 className="text-white text-2xl md:text-3xl font-bold mb-2">
+            동문 여러분의 참여가<br />인하의 미래를 만듭니다
+          </h2>
+          <p className="text-white/60 text-sm mb-6">회비발전기금 · 장학기금 · 동문회관 건립기금</p>
+          <div className="flex gap-3">
+            <Link href="/donate" className="px-6 py-3 bg-[#C8A951] text-[#003876] font-bold rounded-full text-sm hover:bg-[#d4b96a] transition-colors">
+              기부하기
+            </Link>
+            <Link href="/donate/membership" className="px-6 py-3 border border-white/30 text-white text-sm font-semibold rounded-full hover:border-white transition-colors">
+              회비 납부
+            </Link>
+          </div>
+        </div>
+        <div className="space-y-4">
+          {funds.map((fund) => (
+            <div key={fund.label}>
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-white/80 text-sm font-medium">{fund.label}</span>
+                <span className="text-[#C8A951] text-sm font-bold">{fund.current}%</span>
+              </div>
+              <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                <div className="h-full bg-[#C8A951] rounded-full" style={{ width: `${fund.current}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function BizSection() {
   return (
     <section className="bg-white py-8 md:py-10 border-b border-gray-100">
@@ -91,6 +133,7 @@ export default async function HomePage() {
         <InhaShopBanner />
         <BizSection />
         <NewsSection posts={posts ?? []} condolences={condolences ?? []} />
+        <DonationDashboard />
       </main>
       <Footer />
     </div>
