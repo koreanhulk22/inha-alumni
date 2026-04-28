@@ -23,7 +23,7 @@ export function SubPageLayout({ breadcrumbs, sideMenus, currentPath, children }:
   return (
     <div className="min-h-screen flex flex-col font-[Pretendard,system-ui,sans-serif]">
       <GNB />
-      <main className="flex-1 bg-gray-50">
+      <main className="flex-1 bg-gray-50 pt-16">
         {/* 브레드크럼 */}
         <div className="bg-white border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 py-3">

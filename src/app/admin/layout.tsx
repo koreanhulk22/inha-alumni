@@ -21,7 +21,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (!profile?.is_admin) redirect("/");
 
   return (
-    <div className="min-h-screen flex font-[Pretendard,system-ui,sans-serif] bg-gray-50">
+    <div className="min-h-screen flex font-[Pretendard,system-ui,sans-serif] bg-gray-50 pt-16">
       {/* 사이드바 */}
       <aside className="w-56 shrink-0 bg-[#003876] min-h-screen flex flex-col">
         <div className="px-5 py-6 border-b border-white/10">
