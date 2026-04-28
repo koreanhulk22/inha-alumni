@@ -29,12 +29,28 @@ export function HeroBanner({ banners }: Props) {
 
   const slides = banners.length > 0 ? banners : [
     {
-      id: "default",
+      id: "default-1",
       title: "인하대학교 총동창회",
       subtitle: "친목공영 | 모교후원 | 후진육영",
-      image_url: null,
+      image_url: "/images/hero-1.png",
       link_url: "/about/greeting",
       sort_order: 0,
+    },
+    {
+      id: "default-2",
+      title: "인하인의 자랑스러운 모교",
+      subtitle: "개교 71주년, 함께 만들어가는 인하의 미래",
+      image_url: "/images/hero-2.jpg",
+      link_url: "/about/greeting",
+      sort_order: 1,
+    },
+    {
+      id: "default-3",
+      title: "인하 용현벌 캠퍼스",
+      subtitle: "동문 여러분의 모교를 소개합니다",
+      image_url: "/images/hero-3.jpg",
+      link_url: "/about/greeting",
+      sort_order: 2,
     },
   ];
 
