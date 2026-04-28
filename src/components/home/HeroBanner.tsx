@@ -46,8 +46,8 @@ export function HeroBanner({ banners }: Props) {
     },
     {
       id: "default-3",
-      title: "인하 용현벌 캠퍼스",
-      subtitle: "동문 여러분의 모교를 소개합니다",
+      title: "인하대학교 캠퍼스",
+      subtitle: "동문 여러분의 자랑스러운 모교",
       image_url: "/images/hero-3.jpg",
       link_url: "/about/greeting",
       sort_order: 2,
