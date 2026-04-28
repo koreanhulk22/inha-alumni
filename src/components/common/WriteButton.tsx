@@ -28,6 +28,7 @@ export function WriteButton({ postType, userId }: Props) {
       content: form.content,
       summary: form.content.slice(0, 80),
       author_id: userId,
+      is_board_approved: false, // 관리자 승인 후 노출
     });
     if (err) {
       setError("저장 중 오류가 발생했습니다. 동문 인증이 필요할 수 있습니다.");

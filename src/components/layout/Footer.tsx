@@ -76,7 +76,18 @@ export function Footer() {
           <p className="text-xs">
             Copyright © 2026 인하대학교 총동창회. All Rights Reserved.
           </p>
-          <div className="flex gap-4 text-xs">
+          <div className="flex items-center gap-4 text-xs">
+            {/* 카카오 채널 */}
+            <a
+              href="https://pf.kakao.com"
+              className="flex items-center gap-1.5 text-gray-400 hover:text-yellow-400 transition-colors"
+              aria-label="카카오 채널"
+            >
+              <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 3C6.477 3 2 6.477 2 10.923c0 2.868 1.616 5.389 4.057 6.913-.164.595-.59 2.154-.677 2.49-.107.416.152.41.32.299.132-.087 2.1-1.43 2.95-2.01.432.06.874.09 1.35.09 5.523 0 10-3.477 10-7.782C22 6.477 17.523 3 12 3z"/>
+              </svg>
+              <span>카카오 채널</span>
+            </a>
             <Link href="/privacy" className="hover:text-white transition-colors">개인정보처리방침</Link>
             <Link href="/terms" className="hover:text-white transition-colors">이용약관</Link>
           </div>

@@ -1,2 +1,2 @@
 import { redirect } from "next/navigation";
-export default function ScholarshipPage() { redirect("/scholarship/about"); }
+export default function ScholarshipPage() { redirect("https://inhaasf.com"); }

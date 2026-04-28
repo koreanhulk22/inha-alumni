@@ -63,12 +63,13 @@ const menus = [
   },
   {
     label: "동문장학회",
-    href: "/scholarship",
+    href: "https://inhaasf.com",
+    external: true,
     children: [
-      { label: "장학회 소개", href: "/scholarship/about" },
-      { label: "기금 현황", href: "/scholarship/fund" },
-      { label: "기부내역", href: "/scholarship/donors" },
-      { label: "공지사항", href: "/scholarship/notice" },
+      { label: "장학회 소개", href: "https://inhaasf.com" },
+      { label: "기금 현황", href: "https://inhaasf.com" },
+      { label: "기부내역", href: "https://inhaasf.com" },
+      { label: "공지사항", href: "https://inhaasf.com" },
     ],
   },
   {
@@ -154,23 +155,28 @@ export function GNB() {
                 onMouseEnter={() => setActiveMenu(i)}
                 onMouseLeave={() => setActiveMenu(null)}
               >
-                <Link
-                  href={menu.href}
-                  className="px-3 py-5 text-sm font-medium text-gray-700 hover:text-[#003876] whitespace-nowrap block"
-                >
-                  {menu.label}
-                </Link>
+                {"external" in menu && menu.external ? (
+                  <a href={menu.href} className="px-3 py-5 text-sm font-medium text-gray-700 hover:text-[#003876] whitespace-nowrap block">
+                    {menu.label}
+                  </a>
+                ) : (
+                  <Link href={menu.href} className="px-3 py-5 text-sm font-medium text-gray-700 hover:text-[#003876] whitespace-nowrap block">
+                    {menu.label}
+                  </Link>
+                )}
 
                 {activeMenu === i && (
                   <div className="absolute top-full left-0 bg-white border border-gray-200 rounded-b-lg shadow-lg min-w-35 py-2 z-50">
                     {menu.children.map((child) => (
-                      <Link
-                        key={child.href}
-                        href={child.href}
-                        className="block px-4 py-2 text-sm text-gray-600 hover:bg-[#E8F0FE] hover:text-[#003876]"
-                      >
-                        {child.label}
-                      </Link>
+                      "external" in menu && menu.external ? (
+                        <a key={child.href} href={child.href} className="block px-4 py-2 text-sm text-gray-600 hover:bg-[#E8F0FE] hover:text-[#003876]">
+                          {child.label}
+                        </a>
+                      ) : (
+                        <Link key={child.href} href={child.href} className="block px-4 py-2 text-sm text-gray-600 hover:bg-[#E8F0FE] hover:text-[#003876]">
+                          {child.label}
+                        </Link>
+                      )
                     ))}
                   </div>
                 )}

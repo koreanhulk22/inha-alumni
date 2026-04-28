@@ -5,6 +5,7 @@ import Link from "next/link";
 const navItems = [
   { label: "대시보드", href: "/admin" },
   { label: "게시글 관리", href: "/admin/posts" },
+  { label: "자유게시판 승인", href: "/admin/board" },
   { label: "경조사 관리", href: "/admin/condolences" },
   { label: "회원 관리", href: "/admin/users" },
   { label: "업소 관리", href: "/admin/businesses" },

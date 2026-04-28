@@ -17,6 +17,7 @@ export default async function BoardPage() {
       .from("posts")
       .select("id, type, title, summary, created_at, is_pinned, views")
       .eq("type", "자유게시판")
+      .eq("is_board_approved", true)
       .order("created_at", { ascending: false }),
     supabase.auth.getUser(),
   ]);

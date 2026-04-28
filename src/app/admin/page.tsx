@@ -10,17 +10,19 @@ export default async function AdminDashboard() {
     { count: userCount },
     { count: verifiedCount },
     { count: pendingBusinessCount },
+    { count: pendingBoardCount },
   ] = await Promise.all([
     admin.from("posts").select("*", { count: "exact", head: true }),
     admin.from("users").select("*", { count: "exact", head: true }),
     admin.from("users").select("*", { count: "exact", head: true }).eq("is_alumni_verified", true),
     admin.from("alumni_businesses").select("*", { count: "exact", head: true }).eq("is_approved", false),
+    admin.from("posts").select("*", { count: "exact", head: true }).eq("type", "자유게시판").eq("is_board_approved", false),
   ]);
 
   const stats = [
     { label: "전체 게시글", value: postCount ?? 0, href: "/admin/posts", color: "#003876" },
     { label: "전체 회원", value: userCount ?? 0, href: "/admin/users", color: "#0066CC" },
-    { label: "인증 동문", value: verifiedCount ?? 0, href: "/admin/users", color: "#22c55e" },
+    { label: "게시판 승인 대기", value: pendingBoardCount ?? 0, href: "/admin/board", color: "#ef4444" },
     { label: "업소 승인 대기", value: pendingBusinessCount ?? 0, href: "/admin/businesses", color: "#C8A951" },
   ];
 

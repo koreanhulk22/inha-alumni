@@ -52,7 +52,7 @@ export function HeroBanner({ banners }: Props) {
 
   return (
     <section
-      className="relative h-100 md:h-125 overflow-hidden"
+      className="relative h-64 sm:h-80 md:h-[500px] overflow-hidden"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -63,7 +63,6 @@ export function HeroBanner({ banners }: Props) {
             i === current ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
           }`}
         >
-          {/* 배경: 이미지 or 그라디언트 */}
           {slide.image_url ? (
             <>
               <Image
@@ -73,28 +72,27 @@ export function HeroBanner({ banners }: Props) {
                 className="object-cover"
                 priority={i === 0}
               />
-              <div className="absolute inset-0 bg-[#003876]/60" />
+              <div className="absolute inset-0 bg-[#003876]/55" />
             </>
           ) : (
             <div className={`absolute inset-0 bg-linear-to-r ${bgGradients[i % bgGradients.length]}`} />
           )}
 
-          {/* 콘텐츠 */}
-          <div className="relative z-10 max-w-7xl mx-auto px-4 h-full flex items-center">
+          <div className="relative z-10 max-w-7xl mx-auto px-5 h-full flex items-center">
             <div className="text-white max-w-2xl">
-              <p className="text-[#C8A951] text-sm font-medium mb-3 tracking-widest uppercase">
+              <p className="text-[#C8A951] text-xs sm:text-sm font-medium mb-2 sm:mb-3 tracking-widest uppercase">
                 인하대학교 총동창회
               </p>
-              <h2 className="text-3xl md:text-5xl font-bold mb-4 leading-tight">
+              <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold mb-3 sm:mb-4 leading-tight">
                 {slide.title}
               </h2>
               {slide.subtitle && (
-                <p className="text-white/80 text-lg mb-8">{slide.subtitle}</p>
+                <p className="text-white/80 text-sm sm:text-lg mb-6 sm:mb-8">{slide.subtitle}</p>
               )}
               {slide.link_url && (
                 <Link
                   href={slide.link_url}
-                  className="inline-block px-6 py-3 bg-white text-[#003876] font-semibold rounded-full hover:bg-[#E8F0FE] transition-colors text-sm"
+                  className="inline-block px-5 sm:px-6 py-2.5 sm:py-3 bg-white text-[#003876] font-semibold rounded-full hover:bg-[#E8F0FE] transition-colors text-sm"
                 >
                   자세히 보기
                 </Link>
@@ -104,41 +102,37 @@ export function HeroBanner({ banners }: Props) {
         </div>
       ))}
 
-      {/* 컨트롤 */}
       {slides.length > 1 && (
         <>
-          {/* 인디케이터 */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+          <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
             {slides.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setCurrent(i)}
-                className={`h-2 rounded-full transition-all ${
-                  i === current ? "bg-white w-6" : "bg-white/50 w-2"
+                className={`h-1.5 sm:h-2 rounded-full transition-all ${
+                  i === current ? "bg-white w-5 sm:w-6" : "bg-white/50 w-1.5 sm:w-2"
                 }`}
                 aria-label={`슬라이드 ${i + 1}`}
               />
             ))}
           </div>
 
-          {/* 좌우 화살표 */}
           <button
             onClick={prev}
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/20 hover:bg-white/35 rounded-full flex items-center justify-center text-white text-xl transition-colors z-10"
+            className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 bg-white/20 hover:bg-white/35 rounded-full flex items-center justify-center text-white text-lg sm:text-xl transition-colors z-10"
             aria-label="이전"
           >
             ‹
           </button>
           <button
             onClick={next}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/20 hover:bg-white/35 rounded-full flex items-center justify-center text-white text-xl transition-colors z-10"
+            className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 bg-white/20 hover:bg-white/35 rounded-full flex items-center justify-center text-white text-lg sm:text-xl transition-colors z-10"
             aria-label="다음"
           >
             ›
           </button>
 
-          {/* 슬라이드 번호 */}
-          <div className="absolute bottom-6 right-6 z-10 text-white/60 text-xs tabular-nums">
+          <div className="absolute bottom-4 sm:bottom-6 right-4 sm:right-6 z-10 text-white/60 text-xs tabular-nums">
             {current + 1} / {slides.length}
           </div>
         </>

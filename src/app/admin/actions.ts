@@ -127,6 +127,15 @@ export async function toggleBanner(id: string, isActive: boolean) {
   revalidatePath("/");
 }
 
+export async function approveBoardPost(id: string, approved: boolean) {
+  await requireAdmin();
+  const admin = createAdminClient();
+  const { error } = await admin.from("posts").update({ is_board_approved: approved }).eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin/board");
+  revalidatePath("/community/board");
+}
+
 export async function createCondolence(formData: FormData) {
   await requireAdmin();
   const admin = createAdminClient();
