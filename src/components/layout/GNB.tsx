@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
@@ -95,10 +95,14 @@ export function GNB() {
   const [activeMenu, setActiveMenu] = useState<number | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  const pathname = usePathname();
+
+  const isHome = pathname === "/";
 
   useEffect(() => {
     const supabase = createClient();
@@ -108,6 +112,13 @@ export function GNB() {
     });
     return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!isHome) return;
+    const onScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [isHome]);
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -127,8 +138,15 @@ export function GNB() {
     if (searchOpen) searchRef.current?.focus();
   }, [searchOpen]);
 
+  // 홈: 투명→스크롤시 white / 서브페이지: 항상 white
+  const transparent = isHome && !scrolled && !mobileOpen;
+
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      transparent
+        ? "bg-transparent border-transparent shadow-none"
+        : "bg-white border-b border-gray-200 shadow-sm"
+    }`}>
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center h-16">
           {/* 로고 */}
@@ -136,13 +154,18 @@ export function GNB() {
             <Image
               src="/images/inha-emblem.png"
               alt="인하대학교 엠블럼"
-              width={44}
-              height={44}
+              width={40}
+              height={40}
               priority
+              className={transparent ? "brightness-0 invert" : ""}
             />
             <div className="hidden sm:block">
-              <div className="text-[#003876] font-bold text-base leading-tight whitespace-nowrap">인하대학교 총동창회</div>
-              <div className="text-[#003876] text-[10px] leading-tight tracking-wide whitespace-nowrap">Inha University Alumni Association</div>
+              <div className={`font-bold text-sm leading-tight whitespace-nowrap transition-colors ${transparent ? "text-white" : "text-[#003876]"}`}>
+                인하대학교 총동창회
+              </div>
+              <div className={`text-[10px] leading-tight tracking-wide whitespace-nowrap transition-colors ${transparent ? "text-white/70" : "text-[#003876]"}`}>
+                Inha University Alumni Association
+              </div>
             </div>
           </Link>
 
@@ -156,17 +179,17 @@ export function GNB() {
                 onMouseLeave={() => setActiveMenu(null)}
               >
                 {"external" in menu && menu.external ? (
-                  <a href={menu.href} className="px-3 py-5 text-sm font-medium text-gray-700 hover:text-[#003876] whitespace-nowrap block">
+                  <a href={menu.href} className={`px-3 py-5 text-sm font-medium whitespace-nowrap block transition-colors ${transparent ? "text-white/90 hover:text-white" : "text-gray-700 hover:text-[#003876]"}`}>
                     {menu.label}
                   </a>
                 ) : (
-                  <Link href={menu.href} className="px-3 py-5 text-sm font-medium text-gray-700 hover:text-[#003876] whitespace-nowrap block">
+                  <Link href={menu.href} className={`px-3 py-5 text-sm font-medium whitespace-nowrap block transition-colors ${transparent ? "text-white/90 hover:text-white" : "text-gray-700 hover:text-[#003876]"}`}>
                     {menu.label}
                   </Link>
                 )}
 
                 {activeMenu === i && (
-                  <div className="absolute top-full left-0 bg-white border border-gray-200 rounded-b-lg shadow-lg min-w-35 py-2 z-50">
+                  <div className="absolute top-full left-0 bg-white border border-gray-200 rounded-b-lg shadow-lg min-w-36 py-2 z-50">
                     {menu.children.map((child) => (
                       "external" in menu && menu.external ? (
                         <a key={child.href} href={child.href} className="block px-4 py-2 text-sm text-gray-600 hover:bg-[#E8F0FE] hover:text-[#003876]">
@@ -194,7 +217,7 @@ export function GNB() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="검색어를 입력하세요"
-                  className="w-44 px-3 py-1.5 text-sm border border-gray-300 rounded-full focus:outline-none focus:border-[#003876]"
+                  className="w-44 px-3 py-1.5 text-sm border border-gray-300 rounded-full focus:outline-none focus:border-[#003876] bg-white"
                 />
                 <button type="submit" className="p-1.5 text-[#003876]">
                   <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -210,7 +233,7 @@ export function GNB() {
             ) : (
               <button
                 onClick={() => setSearchOpen(true)}
-                className="hidden sm:flex p-2 text-gray-500 hover:text-[#003876] transition-colors"
+                className={`hidden sm:flex p-2 transition-colors ${transparent ? "text-white/80 hover:text-white" : "text-gray-500 hover:text-[#003876]"}`}
                 aria-label="검색"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -221,31 +244,19 @@ export function GNB() {
 
             {user ? (
               <>
-                <Link
-                  href="/mypage"
-                  className="hidden sm:block px-4 py-1.5 text-sm text-[#003876] border border-[#003876] rounded-full hover:bg-[#003876] hover:text-white transition-colors"
-                >
+                <Link href="/mypage" className={`hidden sm:block px-4 py-1.5 text-sm rounded-full border transition-colors ${transparent ? "border-white/60 text-white hover:bg-white/20" : "border-[#003876] text-[#003876] hover:bg-[#003876] hover:text-white"}`}>
                   마이페이지
                 </Link>
-                <button
-                  onClick={handleLogout}
-                  className="hidden sm:block px-4 py-1.5 text-sm bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors"
-                >
+                <button onClick={handleLogout} className={`hidden sm:block px-4 py-1.5 text-sm rounded-full transition-colors ${transparent ? "bg-white/20 text-white hover:bg-white/30" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
                   로그아웃
                 </button>
               </>
             ) : (
               <>
-                <Link
-                  href="/auth/login"
-                  className="hidden sm:block px-4 py-1.5 text-sm text-[#003876] border border-[#003876] rounded-full hover:bg-[#003876] hover:text-white transition-colors"
-                >
+                <Link href="/auth/login" className={`hidden sm:block px-4 py-1.5 text-sm rounded-full border transition-colors ${transparent ? "border-white/60 text-white hover:bg-white/20" : "border-[#003876] text-[#003876] hover:bg-[#003876] hover:text-white"}`}>
                   로그인
                 </Link>
-                <Link
-                  href="/auth/signup"
-                  className="hidden sm:block px-4 py-1.5 text-sm bg-[#003876] text-white rounded-full hover:bg-[#002a5c] transition-colors"
-                >
+                <Link href="/auth/signup" className={`hidden sm:block px-4 py-1.5 text-sm rounded-full transition-colors ${transparent ? "bg-white text-[#003876] hover:bg-white/90" : "bg-[#003876] text-white hover:bg-[#002a5c]"}`}>
                   회원가입
                 </Link>
               </>
@@ -257,9 +268,9 @@ export function GNB() {
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label="메뉴"
             >
-              <div className="w-5 h-0.5 bg-gray-700 mb-1" />
-              <div className="w-5 h-0.5 bg-gray-700 mb-1" />
-              <div className="w-5 h-0.5 bg-gray-700" />
+              <div className={`w-5 h-0.5 mb-1 transition-colors ${transparent ? "bg-white" : "bg-gray-700"}`} />
+              <div className={`w-5 h-0.5 mb-1 transition-colors ${transparent ? "bg-white" : "bg-gray-700"}`} />
+              <div className={`w-5 h-0.5 transition-colors ${transparent ? "bg-white" : "bg-gray-700"}`} />
             </button>
           </div>
         </div>
@@ -274,35 +285,38 @@ export function GNB() {
                 {menu.label}
               </div>
               {menu.children.map((child) => (
-                <Link
-                  key={child.href}
-                  href={child.href}
-                  className="block px-6 py-2 text-sm text-gray-600 border-b border-gray-100"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  {child.label}
-                </Link>
+                "external" in menu && menu.external ? (
+                  <a
+                    key={child.href}
+                    href={child.href}
+                    className="block px-6 py-2 text-sm text-gray-600 border-b border-gray-100"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {child.label}
+                  </a>
+                ) : (
+                  <Link
+                    key={child.href}
+                    href={child.href}
+                    className="block px-6 py-2 text-sm text-gray-600 border-b border-gray-100"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {child.label}
+                  </Link>
+                )
               ))}
             </div>
           ))}
           <div className="p-4 flex gap-2">
             {user ? (
               <>
-                <Link href="/mypage" className="flex-1 text-center py-2 text-sm border border-[#003876] text-[#003876] rounded-full" onClick={() => setMobileOpen(false)}>
-                  마이페이지
-                </Link>
-                <button onClick={handleLogout} className="flex-1 text-center py-2 text-sm bg-gray-100 text-gray-600 rounded-full">
-                  로그아웃
-                </button>
+                <Link href="/mypage" className="flex-1 text-center py-2 text-sm border border-[#003876] text-[#003876] rounded-full" onClick={() => setMobileOpen(false)}>마이페이지</Link>
+                <button onClick={handleLogout} className="flex-1 text-center py-2 text-sm bg-gray-100 text-gray-600 rounded-full">로그아웃</button>
               </>
             ) : (
               <>
-                <Link href="/auth/login" className="flex-1 text-center py-2 text-sm border border-[#003876] text-[#003876] rounded-full" onClick={() => setMobileOpen(false)}>
-                  로그인
-                </Link>
-                <Link href="/auth/signup" className="flex-1 text-center py-2 text-sm bg-[#003876] text-white rounded-full" onClick={() => setMobileOpen(false)}>
-                  회원가입
-                </Link>
+                <Link href="/auth/login" className="flex-1 text-center py-2 text-sm border border-[#003876] text-[#003876] rounded-full" onClick={() => setMobileOpen(false)}>로그인</Link>
+                <Link href="/auth/signup" className="flex-1 text-center py-2 text-sm bg-[#003876] text-white rounded-full" onClick={() => setMobileOpen(false)}>회원가입</Link>
               </>
             )}
           </div>

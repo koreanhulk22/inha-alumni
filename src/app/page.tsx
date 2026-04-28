@@ -3,7 +3,6 @@ import { createClient } from "@/lib/supabase/server";
 import { GNB } from "@/components/layout/GNB";
 import { Footer } from "@/components/layout/Footer";
 import { HeroBanner } from "@/components/home/HeroBanner";
-import { QuickMenu } from "@/components/home/QuickMenu";
 import { NewsSection } from "@/components/home/NewsSection";
 
 function InhaShopBanner() {
@@ -63,7 +62,7 @@ function BizSection() {
 export default async function HomePage() {
   const supabase = await createClient();
 
-  const [{ data: posts }, { data: banners }, { data: condolences }] = await Promise.all([
+  const [{ data: posts }, { data: banners }, { data: condolences }, { data: notices }] = await Promise.all([
     supabase
       .from("posts")
       .select("id, type, title, summary, image_url, created_at, is_pinned")
@@ -80,14 +79,20 @@ export default async function HomePage() {
       .select("id, name, type, content, event_date")
       .order("created_at", { ascending: false })
       .limit(6),
+    supabase
+      .from("posts")
+      .select("id, title")
+      .eq("type", "공지사항")
+      .eq("is_pinned", true)
+      .order("created_at", { ascending: false })
+      .limit(5),
   ]);
 
   return (
     <div className="min-h-screen flex flex-col font-[Pretendard,system-ui,sans-serif]">
       <GNB />
       <main className="flex-1">
-        <HeroBanner banners={banners ?? []} />
-        <QuickMenu />
+        <HeroBanner banners={banners ?? []} notices={notices ?? []} />
         <InhaShopBanner />
         <BizSection />
         <NewsSection posts={posts ?? []} condolences={condolences ?? []} />
