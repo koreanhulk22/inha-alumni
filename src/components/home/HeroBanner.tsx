@@ -165,54 +165,22 @@ export function HeroBanner({ banners, notices }: Props) {
       <div className="absolute bottom-0 left-0 right-0 z-20 bg-[#1A2A4A]/90 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-3 md:grid-cols-5 divide-x divide-white/10">
-            {/* 모바일: 퀵메뉴 3개 + 공지 */}
+            {/* 모바일: 첫 3개 */}
             {quickMenus.slice(0, 3).map((menu) => (
               <Link
-                key={menu.href}
+                key={`m-${menu.href}`}
                 href={menu.href}
-                className="flex flex-col items-center gap-1.5 py-4 md:py-5 hover:bg-white/10 transition-colors md:hidden"
+                className="flex flex-col items-center gap-1.5 py-4 hover:bg-white/10 transition-colors md:hidden"
               >
                 <span className="text-xl">{menu.icon}</span>
                 <span className="text-white text-xs font-medium">{menu.label}</span>
               </Link>
             ))}
 
-            {/* 데스크탑: 퀵메뉴 2개 */}
-            {quickMenus.slice(0, 2).map((menu) => (
+            {/* 데스크탑: 5개 전부 */}
+            {quickMenus.map((menu) => (
               <Link
-                key={menu.href}
-                href={menu.href}
-                className="hidden md:flex flex-col items-center gap-1.5 py-5 hover:bg-white/10 transition-colors"
-              >
-                <span className="text-2xl">{menu.icon}</span>
-                <span className="text-white text-xs font-medium">{menu.label}</span>
-              </Link>
-            ))}
-
-            {/* 공지사항 인라인 (데스크탑) */}
-            <div className="hidden md:flex flex-col justify-center px-5 py-4 col-span-1">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[#C8A951] text-xs font-semibold tracking-wide">공지사항</span>
-                <Link href="/news/notice" className="text-white/40 text-xs hover:text-white/70 transition-colors">+ 더보기</Link>
-              </div>
-              <div className="overflow-hidden h-5">
-                {notices.length > 0 ? (
-                  <Link
-                    href={`/news/${notices[noticeIndex]?.id}`}
-                    className="block text-white/85 text-sm truncate hover:text-white transition-colors"
-                  >
-                    {notices[noticeIndex]?.title}
-                  </Link>
-                ) : (
-                  <span className="text-white/40 text-sm">등록된 공지가 없습니다</span>
-                )}
-              </div>
-            </div>
-
-            {/* 데스크탑: 나머지 퀵메뉴 */}
-            {quickMenus.slice(2).map((menu) => (
-              <Link
-                key={menu.href}
+                key={`d-${menu.href}`}
                 href={menu.href}
                 className="hidden md:flex flex-col items-center gap-1.5 py-5 hover:bg-white/10 transition-colors"
               >
