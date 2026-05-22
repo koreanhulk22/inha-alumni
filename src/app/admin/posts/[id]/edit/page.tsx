@@ -39,7 +39,7 @@ export default function EditPostPage() {
     try {
       const formData = new FormData(e.currentTarget);
       await updatePost(id, formData);
-      router.push("/admin/posts");
+      router.push("/admin?tab=posts");
     } catch (err) {
       setError(err instanceof Error ? err.message : "오류가 발생했습니다");
       setLoading(false);

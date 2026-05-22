@@ -27,7 +27,7 @@ export async function createPost(formData: FormData) {
     author_name: formData.get("author_name") as string || "총동창회",
   });
   if (error) throw new Error(error.message);
-  revalidatePath("/admin/posts");
+  revalidatePath("/admin");
   revalidatePath("/news/notice");
   revalidatePath("/");
 }
@@ -46,7 +46,7 @@ export async function updatePost(id: string, formData: FormData) {
     author_name: formData.get("author_name") as string || "총동창회",
   }).eq("id", id);
   if (error) throw new Error(error.message);
-  revalidatePath("/admin/posts");
+  revalidatePath("/admin");
   revalidatePath("/");
 }
 
@@ -55,7 +55,7 @@ export async function deletePost(id: string) {
   const admin = createAdminClient();
   const { error } = await admin.from("posts").delete().eq("id", id);
   if (error) throw new Error(error.message);
-  revalidatePath("/admin/posts");
+  revalidatePath("/admin");
   revalidatePath("/");
 }
 
@@ -64,7 +64,7 @@ export async function verifyAlumni(userId: string, verified: boolean) {
   const admin = createAdminClient();
   const { error } = await admin.from("users").update({ is_alumni_verified: verified }).eq("id", userId);
   if (error) throw new Error(error.message);
-  revalidatePath("/admin/users");
+  revalidatePath("/admin");
 }
 
 export async function setAdmin(userId: string, isAdmin: boolean) {
@@ -72,7 +72,7 @@ export async function setAdmin(userId: string, isAdmin: boolean) {
   const admin = createAdminClient();
   const { error } = await admin.from("users").update({ is_admin: isAdmin }).eq("id", userId);
   if (error) throw new Error(error.message);
-  revalidatePath("/admin/users");
+  revalidatePath("/admin");
 }
 
 export async function approveBusiness(id: string, approved: boolean) {
@@ -80,7 +80,7 @@ export async function approveBusiness(id: string, approved: boolean) {
   const admin = createAdminClient();
   const { error } = await admin.from("alumni_businesses").update({ is_approved: approved }).eq("id", id);
   if (error) throw new Error(error.message);
-  revalidatePath("/admin/businesses");
+  revalidatePath("/admin");
   revalidatePath("/business/place");
 }
 
@@ -89,7 +89,7 @@ export async function deleteBusiness(id: string) {
   const admin = createAdminClient();
   const { error } = await admin.from("alumni_businesses").delete().eq("id", id);
   if (error) throw new Error(error.message);
-  revalidatePath("/admin/businesses");
+  revalidatePath("/admin");
 }
 
 export async function createBanner(formData: FormData) {
@@ -105,7 +105,7 @@ export async function createBanner(formData: FormData) {
     is_active: true,
   });
   if (error) throw new Error(error.message);
-  revalidatePath("/admin/banners");
+  revalidatePath("/admin");
   revalidatePath("/");
 }
 
@@ -114,7 +114,7 @@ export async function deleteBanner(id: string) {
   const admin = createAdminClient();
   const { error } = await admin.from("banners").delete().eq("id", id);
   if (error) throw new Error(error.message);
-  revalidatePath("/admin/banners");
+  revalidatePath("/admin");
   revalidatePath("/");
 }
 
@@ -123,7 +123,7 @@ export async function toggleBanner(id: string, isActive: boolean) {
   const admin = createAdminClient();
   const { error } = await admin.from("banners").update({ is_active: isActive }).eq("id", id);
   if (error) throw new Error(error.message);
-  revalidatePath("/admin/banners");
+  revalidatePath("/admin");
   revalidatePath("/");
 }
 
@@ -132,7 +132,7 @@ export async function approveBoardPost(id: string, approved: boolean) {
   const admin = createAdminClient();
   const { error } = await admin.from("posts").update({ is_board_approved: approved }).eq("id", id);
   if (error) throw new Error(error.message);
-  revalidatePath("/admin/board");
+  revalidatePath("/admin");
   revalidatePath("/community/board");
 }
 
@@ -146,7 +146,7 @@ export async function createCondolence(formData: FormData) {
     event_date: formData.get("event_date") as string || null,
   });
   if (error) throw new Error(error.message);
-  revalidatePath("/admin/condolences");
+  revalidatePath("/admin");
   revalidatePath("/community/condolence");
   revalidatePath("/");
 }
@@ -156,7 +156,7 @@ export async function deleteCondolence(id: string) {
   const admin = createAdminClient();
   const { error } = await admin.from("condolence_events").delete().eq("id", id);
   if (error) throw new Error(error.message);
-  revalidatePath("/admin/condolences");
+  revalidatePath("/admin");
   revalidatePath("/community/condolence");
   revalidatePath("/");
 }
@@ -183,8 +183,8 @@ export async function approveVerification(id: string) {
     .eq("id", req.user_id);
   if (userError) throw new Error(userError.message);
 
-  revalidatePath("/admin/verifications");
-  revalidatePath("/admin/users");
+  revalidatePath("/admin");
+  revalidatePath("/admin");
 }
 
 export async function rejectVerification(id: string, note?: string) {
@@ -195,7 +195,7 @@ export async function rejectVerification(id: string, note?: string) {
     .update({ status: "rejected", admin_note: note ?? null, reviewed_at: new Date().toISOString() })
     .eq("id", id);
   if (error) throw new Error(error.message);
-  revalidatePath("/admin/verifications");
+  revalidatePath("/admin");
 }
 
 export async function deleteVerification(id: string) {
@@ -203,5 +203,5 @@ export async function deleteVerification(id: string) {
   const admin = createAdminClient();
   const { error } = await admin.from("alumni_verification_requests").delete().eq("id", id);
   if (error) throw new Error(error.message);
-  revalidatePath("/admin/verifications");
+  revalidatePath("/admin");
 }

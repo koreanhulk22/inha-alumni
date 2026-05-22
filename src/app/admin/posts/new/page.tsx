@@ -21,7 +21,7 @@ export default function NewPostPage() {
     try {
       const formData = new FormData(e.currentTarget);
       await createPost(formData);
-      router.push("/admin/posts");
+      router.push("/admin?tab=posts");
     } catch (err) {
       setError(err instanceof Error ? err.message : "오류가 발생했습니다");
       setLoading(false);
