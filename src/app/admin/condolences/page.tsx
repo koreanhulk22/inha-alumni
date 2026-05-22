@@ -17,6 +17,9 @@ export default function AdminCondolencesPage() {
   const [events, setEvents] = useState<CondolenceEvent[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [sendSMS, setSendSMS] = useState(true);
+  const [smsTarget, setSmsTarget] = useState<"verified" | "all">("verified");
+  const [smsResult, setSmsResult] = useState<string | null>(null);
 
   async function load() {
     const { data } = await createClient()
@@ -31,8 +34,32 @@ export default function AdminCondolencesPage() {
   async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
+    setSmsResult(null);
     const formData = new FormData(e.currentTarget);
     await createCondolence(formData);
+
+    // 문자 발송
+    if (sendSMS) {
+      const type = formData.get("type") as string;
+      const name = formData.get("name") as string;
+      const content = formData.get("content") as string;
+      const eventDate = formData.get("event_date") as string;
+
+      const msg = `[인하총동창회] ${name} 동문 ${type === "부고" ? "부고" : "경사"} 알림\n${content}${eventDate ? `\n일시: ${eventDate}` : ""}\n자세한 내용: inhain.com`;
+
+      try {
+        const res = await fetch("/api/sms/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: msg, recipientType: smsTarget }),
+        });
+        const json = await res.json();
+        setSmsResult(res.ok ? `✅ ${json.sentCount}명에게 문자 발송 완료` : `⚠️ 등록 완료 (문자 발송 실패: ${json.error})`);
+      } catch {
+        setSmsResult("⚠️ 등록 완료 (문자 발송 중 오류)");
+      }
+    }
+
     setShowForm(false);
     setLoading(false);
     load();
@@ -52,15 +79,21 @@ export default function AdminCondolencesPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-800">경조사 관리</h1>
         <button
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => { setShowForm(!showForm); setSmsResult(null); }}
           className="px-4 py-2 bg-[#003876] text-white text-sm font-semibold rounded-lg hover:bg-[#002a5c] transition-colors"
         >
           {showForm ? "취소" : "+ 경조사 등록"}
         </button>
       </div>
 
+      {smsResult && (
+        <div className={`text-sm px-4 py-3 rounded-lg ${smsResult.startsWith("✅") ? "bg-green-50 text-green-700" : "bg-yellow-50 text-yellow-700"}`}>
+          {smsResult}
+        </div>
+      )}
+
       {showForm && (
-        <form onSubmit={handleCreate} className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
+        <form onSubmit={handleCreate} className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
           <h2 className="text-base font-bold text-gray-700">경조사 등록</h2>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -83,8 +116,51 @@ export default function AdminCondolencesPage() {
             <label className="block text-sm font-medium text-gray-700 mb-1">내용 *</label>
             <input name="content" required placeholder="예: 장녀 결혼, 부친상 — 삼가 고인의 명복을 빕니다" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#003876]" />
           </div>
+
+          {/* 문자 발송 옵션 */}
+          <div className="bg-[#E8F0FE] rounded-xl p-4 space-y-3">
+            <div className="flex items-center gap-2.5">
+              <input
+                type="checkbox"
+                id="sendSMS"
+                checked={sendSMS}
+                onChange={(e) => setSendSMS(e.target.checked)}
+                className="w-4 h-4 accent-[#003876]"
+              />
+              <label htmlFor="sendSMS" className="text-sm font-semibold text-[#003876]">
+                등록 후 회원에게 문자 발송
+              </label>
+            </div>
+            {sendSMS && (
+              <div className="flex items-center gap-3 pl-6">
+                <span className="text-xs text-gray-600 font-medium">발송 대상:</span>
+                {[
+                  { value: "verified", label: "인증 동문만" },
+                  { value: "all", label: "전체 회원" },
+                ].map((opt) => (
+                  <label key={opt.value} className="flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="smsTarget"
+                      value={opt.value}
+                      checked={smsTarget === opt.value}
+                      onChange={() => setSmsTarget(opt.value as "verified" | "all")}
+                      className="accent-[#003876]"
+                    />
+                    <span className="text-xs text-gray-700">{opt.label}</span>
+                  </label>
+                ))}
+              </div>
+            )}
+            {sendSMS && (
+              <p className="text-xs text-gray-500 pl-6">
+                문자 내용은 등록된 내용을 기반으로 자동 생성됩니다.
+              </p>
+            )}
+          </div>
+
           <button type="submit" disabled={loading} className="px-5 py-2 bg-[#003876] text-white text-sm font-semibold rounded-lg hover:bg-[#002a5c] disabled:opacity-50">
-            {loading ? "저장 중..." : "저장"}
+            {loading ? (sendSMS ? "등록 및 발송 중..." : "저장 중...") : (sendSMS ? "등록 + 문자 발송" : "저장")}
           </button>
         </form>
       )}

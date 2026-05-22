@@ -160,3 +160,48 @@ export async function deleteCondolence(id: string) {
   revalidatePath("/community/condolence");
   revalidatePath("/");
 }
+
+export async function approveVerification(id: string) {
+  await requireAdmin();
+  const admin = createAdminClient();
+  const { data: req, error: fetchError } = await admin
+    .from("alumni_verification_requests")
+    .select("user_id")
+    .eq("id", id)
+    .single();
+  if (fetchError || !req) throw new Error("신청 내역을 찾을 수 없습니다.");
+
+  const { error: updateError } = await admin
+    .from("alumni_verification_requests")
+    .update({ status: "approved", reviewed_at: new Date().toISOString() })
+    .eq("id", id);
+  if (updateError) throw new Error(updateError.message);
+
+  const { error: userError } = await admin
+    .from("users")
+    .update({ is_alumni_verified: true })
+    .eq("id", req.user_id);
+  if (userError) throw new Error(userError.message);
+
+  revalidatePath("/admin/verifications");
+  revalidatePath("/admin/users");
+}
+
+export async function rejectVerification(id: string, note?: string) {
+  await requireAdmin();
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("alumni_verification_requests")
+    .update({ status: "rejected", admin_note: note ?? null, reviewed_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin/verifications");
+}
+
+export async function deleteVerification(id: string) {
+  await requireAdmin();
+  const admin = createAdminClient();
+  const { error } = await admin.from("alumni_verification_requests").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin/verifications");
+}

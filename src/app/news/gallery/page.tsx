@@ -1,3 +1,4 @@
+import { createClient } from "@/lib/supabase/server";
 import { SubPageLayout } from "@/components/layout/SubPageLayout";
 
 const sideMenus = [
@@ -8,22 +9,16 @@ const sideMenus = [
   { label: "포토 갤러리", href: "/news/gallery" },
 ];
 
-const galleries = [
-  { title: "제33대 김종우 총동창회장 취임식", date: "2026.01.27", count: 24, emoji: "🎉" },
-  { title: "2025 인하 가족의 밤", date: "2025.12.04", count: 48, emoji: "🌟" },
-  { title: "2025 총동창회장배 골프대회", date: "2025.05.26", count: 36, emoji: "⛳" },
-  { title: "비룡제 격려 방문", date: "2025.05.16", count: 12, emoji: "🎓" },
-  { title: "명예회장단 월례회", date: "2025.04.21", count: 8, emoji: "📋" },
-  { title: "인하대 개교 71주년 기념식", date: "2025.04.24", count: 20, emoji: "🏛️" },
-  { title: "ROTC동문회 현충원 참배", date: "2025.06.01", count: 16, emoji: "🎖️" },
-  { title: "120ROTC산악회 안나푸르나", date: "2025.10.15", count: 32, emoji: "🏔️" },
-  { title: "2024 인하 가족의 밤", date: "2024.12.05", count: 52, emoji: "✨" },
-  { title: "2024 총동창회장배 골프대회", date: "2024.05.20", count: 40, emoji: "⛳" },
-  { title: "인하대 개교 70주년 기념행사", date: "2024.04.24", count: 60, emoji: "🎊" },
-  { title: "인맥회(기계과) 회장 이취임식", date: "2025.03.07", count: 10, emoji: "🏅" },
-];
+export default async function GalleryPage() {
+  const supabase = await createClient();
+  const { data: items } = await supabase
+    .from("gallery_items")
+    .select("id, title, image_url, taken_at")
+    .order("sort_order", { ascending: true })
+    .order("created_at", { ascending: false });
 
-export default function GalleryPage() {
+  const galleries = items ?? [];
+
   return (
     <SubPageLayout
       breadcrumbs={[{ label: "총동창회 소식", href: "/news/notice" }, { label: "포토 갤러리" }]}
@@ -36,22 +31,36 @@ export default function GalleryPage() {
           <p className="text-sm text-gray-400 mt-1">총동창회 주요 행사 사진</p>
         </div>
 
-        <div className="p-6 grid grid-cols-2 md:grid-cols-3 gap-4">
-          {galleries.map((item) => (
-            <div key={item.title} className="group cursor-pointer">
-              <div className="aspect-video bg-linear-to-br from-[#E8F0FE] to-[#003876]/10 rounded-xl flex flex-col items-center justify-center mb-2 group-hover:from-[#003876]/10 group-hover:to-[#003876]/20 transition-all relative overflow-hidden">
-                <span className="text-4xl mb-1">{item.emoji}</span>
-                <span className="text-xs text-[#003876]/60 font-medium">사진 {item.count}장</span>
-                <div className="absolute inset-0 bg-[#003876] opacity-0 group-hover:opacity-5 transition-opacity" />
+        {galleries.length > 0 ? (
+          <div className="p-6 grid grid-cols-2 md:grid-cols-3 gap-4">
+            {galleries.map((item) => (
+              <div key={item.id} className="group cursor-pointer">
+                <div className="aspect-video rounded-xl overflow-hidden mb-2 bg-gray-100">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={item.image_url}
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+                <p className="text-xs font-medium text-gray-700 truncate">{item.title}</p>
+                {item.taken_at && (
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {new Date(item.taken_at).toLocaleDateString("ko-KR")}
+                  </p>
+                )}
               </div>
-              <p className="text-xs font-medium text-gray-700 truncate">{item.title}</p>
-              <p className="text-xs text-gray-400 mt-0.5">{item.date}</p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="py-20 text-center text-gray-400">
+            <p className="text-4xl mb-3">🖼️</p>
+            <p className="text-sm">등록된 사진이 없습니다.</p>
+          </div>
+        )}
 
         <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 text-center">
-          <p className="text-xs text-gray-400">실제 사진은 순차적으로 업로드됩니다. 문의: inha@inhain.com</p>
+          <p className="text-xs text-gray-400">사진 문의: inha@inhain.com</p>
         </div>
       </div>
     </SubPageLayout>

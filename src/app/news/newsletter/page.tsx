@@ -1,3 +1,4 @@
+import { createClient } from "@/lib/supabase/server";
 import { SubPageLayout } from "@/components/layout/SubPageLayout";
 
 const sideMenus = [
@@ -8,18 +9,21 @@ const sideMenus = [
   { label: "포토 갤러리", href: "/news/gallery" },
 ];
 
-const newsletters = [
-  { no: 259, year: 2025, month: "6월", title: "인하동창회보 제259호", sections: ["제33대 취임 특집", "2025 가족의 밤 결산", "동문기업탐방", "장학생 인터뷰"] },
-  { no: 258, year: 2025, month: "3월", title: "인하동창회보 제258호", sections: ["신춘 동문 좌담회", "골프대회 결과", "단위동문회 소식", "모교 최신 소식"] },
-  { no: 257, year: 2024, month: "12월", title: "인하동창회보 제257호", sections: ["2024 가족의 밤", "인하비룡대상 수상자", "연말 동문 모임", "장학회 기금 현황"] },
-  { no: 256, year: 2024, month: "9월", title: "인하동창회보 제256호", sections: ["개교 70주년 특집", "동문 창업 성공사례", "ROTC 현충원 참배", "지역 동문회 소식"] },
-  { no: 255, year: 2024, month: "6월", title: "인하동창회보 제255호", sections: ["비룡제 격려 방문", "2024 골프대회", "동문기업탐방", "모교 발전 기금"] },
-  { no: 254, year: 2024, month: "3월", title: "인하동창회보 제254호", sections: ["신년 하례회", "정기총회 결산", "신임 임원 소개", "후진 육영 사업"] },
-  { no: 253, year: 2023, month: "10월", title: "인하동창회보 제253호", sections: ["가을 체육대회", "지역별 동문회 현황", "모교 산학협력", "장학생 선발 안내"] },
-  { no: 252, year: 2023, month: "6월", title: "인하동창회보 제252호", sections: ["2023 골프대회", "동문 수상 소식", "단위동문회 탐방", "인하플레이스 안내"] },
-];
+const MONTH_LABELS: Record<number, string> = {
+  1: "1월", 2: "2월", 3: "3월", 4: "4월", 5: "5월", 6: "6월",
+  7: "7월", 8: "8월", 9: "9월", 10: "10월", 11: "11월", 12: "12월",
+};
 
-export default function NewsletterPage() {
+export default async function NewsletterPage() {
+  const supabase = await createClient();
+  const { data: items } = await supabase
+    .from("newsletters")
+    .select("id, title, issue_number, year, month, pdf_url, cover_image_url")
+    .order("year", { ascending: false })
+    .order("month", { ascending: false });
+
+  const newsletters = items ?? [];
+
   return (
     <SubPageLayout
       breadcrumbs={[{ label: "총동창회 소식", href: "/news/notice" }, { label: "동창회보" }]}
@@ -32,32 +36,65 @@ export default function NewsletterPage() {
           <p className="text-sm text-gray-400 mt-1">인하대학교 총동창회 기관지 — 연 4회 발행</p>
         </div>
 
-        <div className="divide-y divide-gray-100">
-          {newsletters.map((item) => (
-            <div key={item.no} className="px-6 py-5 hover:bg-gray-50 transition-colors">
-              <div className="flex items-start gap-4">
-                <div className="shrink-0 w-16 h-20 bg-[#003876] rounded-lg flex flex-col items-center justify-center text-white">
-                  <div className="text-xs opacity-70">{item.year}</div>
-                  <div className="text-sm font-bold">{item.month}</div>
-                  <div className="text-xs opacity-70 mt-1">제{item.no}호</div>
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-gray-800 mb-2">{item.title}</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {item.sections.map((section) => (
-                      <span key={section} className="text-xs bg-[#E8F0FE] text-[#003876] px-2 py-0.5 rounded">
-                        {section}
+        {newsletters.length > 0 ? (
+          <div className="divide-y divide-gray-100">
+            {newsletters.map((item) => (
+              <div key={item.id} className="px-6 py-5 hover:bg-gray-50 transition-colors">
+                <div className="flex items-center gap-4">
+                  {item.cover_image_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={item.cover_image_url}
+                      alt=""
+                      className="shrink-0 w-12 h-16 object-cover rounded-lg border border-gray-200"
+                    />
+                  ) : (
+                    <div className="shrink-0 w-16 h-20 bg-[#003876] rounded-lg flex flex-col items-center justify-center text-white">
+                      {item.year && <div className="text-xs opacity-70">{item.year}</div>}
+                      {item.month && <div className="text-sm font-bold">{MONTH_LABELS[item.month] ?? `${item.month}월`}</div>}
+                      {item.issue_number && <div className="text-xs opacity-70 mt-1">제{item.issue_number}호</div>}
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-800 truncate">{item.title}</p>
+                    {(item.year || item.month || item.issue_number) && (
+                      <p className="text-xs text-gray-400 mt-1">
+                        {[
+                          item.year,
+                          item.month ? MONTH_LABELS[item.month] : null,
+                          item.issue_number ? `제${item.issue_number}호` : null,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </p>
+                    )}
+                  </div>
+                  <div className="shrink-0">
+                    {item.pdf_url ? (
+                      <a
+                        href={item.pdf_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-white bg-[#003876] hover:bg-[#002a5c] px-3 py-1.5 rounded-lg font-semibold transition-colors"
+                      >
+                        PDF 다운로드
+                      </a>
+                    ) : (
+                      <span className="text-xs text-gray-300 border border-gray-200 px-3 py-1.5 rounded-lg">
+                        PDF 준비중
                       </span>
-                    ))}
+                    )}
                   </div>
                 </div>
-                <div className="shrink-0 text-xs text-gray-300 border border-gray-200 px-3 py-1.5 rounded-lg">
-                  PDF 준비중
-                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="py-20 text-center text-gray-400">
+            <p className="text-4xl mb-3">📰</p>
+            <p className="text-sm">등록된 동창회보가 없습니다.</p>
+          </div>
+        )}
 
         <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
           <p className="text-xs text-gray-400">동창회보 구독 문의: inha@inhain.com / 032-887-2345</p>

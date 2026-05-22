@@ -10,13 +10,13 @@ export default async function AdminBusinessesPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold text-gray-800">업소 관리 (인하플레이스)</h1>
+      <h1 className="text-2xl font-bold text-gray-800">업체 관리 (인하플레이스)</h1>
 
       <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th className="py-3 px-4 text-left text-gray-500 font-medium">업소명</th>
+              <th className="py-3 px-4 text-left text-gray-500 font-medium">업체명</th>
               <th className="py-3 px-4 text-left text-gray-500 font-medium w-20">분류</th>
               <th className="py-3 px-4 text-left text-gray-500 font-medium hidden md:table-cell">주소</th>
               <th className="py-3 px-4 text-left text-gray-500 font-medium hidden lg:table-cell">혜택</th>
@@ -58,7 +58,7 @@ export default async function AdminBusinessesPage() {
               </tr>
             ))}
             {(!businesses || businesses.length === 0) && (
-              <tr><td colSpan={6} className="py-16 text-center text-gray-400">등록된 업소가 없습니다.</td></tr>
+              <tr><td colSpan={6} className="py-16 text-center text-gray-400">등록된 업체가 없습니다.</td></tr>
             )}
           </tbody>
         </table>
