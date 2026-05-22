@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import Link from "next/link";
 import { SeedButton } from "./SeedButton";
+import { ConfirmButton } from "./ConfirmButton";
 import {
   deletePost,
   verifyAlumni,
@@ -159,12 +160,7 @@ async function PostsTab() {
                 <td className="py-3 px-4 text-center">
                   <div className="flex items-center justify-center gap-2">
                     <Link href={`/admin/posts/${post.id}/edit`} className="text-xs text-[#003876] hover:underline">수정</Link>
-                    <form action={deletePost.bind(null, post.id)}>
-                      <button type="submit" className="text-xs text-red-500 hover:underline"
-                        onClick={(e) => { if (!confirm("삭제하시겠습니까?")) e.preventDefault(); }}>
-                        삭제
-                      </button>
-                    </form>
+                    <ConfirmButton action={deletePost.bind(null, post.id)} />
                   </div>
                 </td>
               </tr>
@@ -224,10 +220,7 @@ async function BoardTab() {
                       <form action={approveBoardPost.bind(null, post.id, true)}>
                         <button type="submit" className="text-xs px-3 py-1 bg-green-50 text-green-600 rounded-full hover:bg-green-100 font-medium transition-colors">승인</button>
                       </form>
-                      <form action={deletePost.bind(null, post.id)}>
-                        <button type="submit" className="text-xs px-3 py-1 bg-red-50 text-red-500 rounded-full hover:bg-red-100 font-medium transition-colors"
-                          onClick={(e) => { if (!confirm("삭제하시겠습니까?")) e.preventDefault(); }}>삭제</button>
-                      </form>
+                      <ConfirmButton action={deletePost.bind(null, post.id)} label="삭제" className="text-xs px-3 py-1 bg-red-50 text-red-500 rounded-full hover:bg-red-100 font-medium transition-colors" />
                     </div>
                   </td>
                 </tr>
@@ -265,10 +258,7 @@ async function BoardTab() {
                       <form action={approveBoardPost.bind(null, post.id, false)}>
                         <button type="submit" className="text-xs text-gray-400 hover:text-gray-600 hover:underline transition-colors">승인취소</button>
                       </form>
-                      <form action={deletePost.bind(null, post.id)}>
-                        <button type="submit" className="text-xs text-red-500 hover:underline"
-                          onClick={(e) => { if (!confirm("삭제하시겠습니까?")) e.preventDefault(); }}>삭제</button>
-                      </form>
+                      <ConfirmButton action={deletePost.bind(null, post.id)} />
                     </div>
                   </td>
                 </tr>
@@ -396,12 +386,7 @@ async function BusinessesTab() {
                   </form>
                 </td>
                 <td className="py-3 px-4 text-center">
-                  <form action={deleteBusiness.bind(null, biz.id)}>
-                    <button type="submit" className="text-xs text-red-500 hover:underline"
-                      onClick={(e) => { if (!confirm("삭제하시겠습니까?")) e.preventDefault(); }}>
-                      삭제
-                    </button>
-                  </form>
+                  <ConfirmButton action={deleteBusiness.bind(null, biz.id)} />
                 </td>
               </tr>
             ))}
@@ -522,10 +507,7 @@ async function VerificationsTab() {
                         {req.reviewed_at ? new Date(req.reviewed_at).toLocaleDateString("ko-KR") : "-"}
                       </td>
                       <td className="py-3 px-4 text-center">
-                        <form action={deleteVerification.bind(null, req.id)}>
-                          <button type="submit" className="text-xs text-red-400 hover:underline"
-                            onClick={(e) => { if (!confirm("삭제하시겠습니까?")) e.preventDefault(); }}>삭제</button>
-                        </form>
+                        <ConfirmButton action={deleteVerification.bind(null, req.id)} />
                       </td>
                     </tr>
                   );

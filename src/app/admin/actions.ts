@@ -127,6 +127,22 @@ export async function toggleBanner(id: string, isActive: boolean) {
   revalidatePath("/");
 }
 
+export async function updateBanner(id: string, formData: FormData) {
+  await requireAdmin();
+  const admin = createAdminClient();
+  const imageUrl = formData.get("image_url") as string;
+  const { error } = await admin.from("banners").update({
+    title: formData.get("title") as string,
+    subtitle: formData.get("subtitle") as string || null,
+    image_url: imageUrl || null,
+    link_url: formData.get("link_url") as string || null,
+    sort_order: parseInt(formData.get("sort_order") as string) || 0,
+  }).eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin");
+  revalidatePath("/");
+}
+
 export async function approveBoardPost(id: string, approved: boolean) {
   await requireAdmin();
   const admin = createAdminClient();
