@@ -16,8 +16,6 @@ interface Props {
   onChangeAttachments: (urls: string[]) => void;
 }
 
-const VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo"];
-
 function isVideo(url: string) {
   return /\.(mp4|webm|mov|avi)(\?|$)/i.test(url);
 }
