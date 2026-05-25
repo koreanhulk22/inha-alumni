@@ -10,6 +10,16 @@ const POST_TYPES = [
   "동문동정", "인터뷰/칼럼", "자유게시판", "구인구직",
 ];
 
+const TYPE_TAB_MAP: Record<string, string> = {
+  "공지사항": "notice",
+  "총동창회소식": "news",
+  "단위동문회소식": "local",
+  "모교소식": "university",
+  "동문동정": "alumni-news",
+  "인터뷰/칼럼": "column",
+  "구인구직": "jobs",
+};
+
 interface Post {
   id: string;
   type: string;
@@ -39,7 +49,9 @@ export default function EditPostPage() {
     try {
       const formData = new FormData(e.currentTarget);
       await updatePost(id, formData);
-      router.push("/admin?tab=posts");
+      const type = formData.get("type") as string;
+      const tab = TYPE_TAB_MAP[type] ?? "notice";
+      router.push(`/admin?tab=${tab}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "오류가 발생했습니다");
       setLoading(false);

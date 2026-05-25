@@ -17,13 +17,24 @@ import {
 // ─── 클라이언트 컴포넌트 탭 (자체 데이터 로딩) ────────────────────
 import CondolencesTab from "./condolences/page";
 import BannersTab from "./banners/page";
+import AdBannersTab from "./ad-banners/AdBannersTab";
 import SMSTab from "./sms/SMSTab";
 import GalleryTab from "./gallery/GalleryTab";
 import NewsletterTab from "./newsletter/NewsletterTab";
 import SettingsTab from "./settings/SettingsTab";
 
 // ─── 타입 ──────────────────────────────────────────────────────────
-type Tab = "dashboard" | "posts" | "board" | "users" | "businesses" | "verifications" | "donations" | "condolences" | "banners" | "sms" | "gallery" | "newsletter" | "settings";
+type Tab = "dashboard" | "notice" | "news" | "local" | "university" | "alumni-news" | "column" | "jobs" | "board" | "users" | "businesses" | "verifications" | "donations" | "condolences" | "banners" | "sms" | "gallery" | "newsletter" | "settings";
+
+const TAB_TYPE_MAP: Partial<Record<Tab, { type: string; label: string }>> = {
+  notice:      { type: "공지사항",      label: "공지사항" },
+  news:        { type: "총동창회소식",  label: "총동창회소식" },
+  local:       { type: "단위동문회소식", label: "단위동문회소식" },
+  university:  { type: "모교소식",      label: "모교소식" },
+  "alumni-news": { type: "동문동정",    label: "동문동정" },
+  column:      { type: "인터뷰/칼럼",   label: "인터뷰/칼럼" },
+  jobs:        { type: "구인구직",      label: "구인구직" },
+};
 
 // ─── 대시보드 ──────────────────────────────────────────────────────
 async function DashboardTab() {
@@ -119,18 +130,24 @@ async function DashboardTab() {
 }
 
 // ─── 게시글 관리 ───────────────────────────────────────────────────
-async function PostsTab() {
+async function PostsTab({ typeFilter, tabLabel }: { typeFilter?: string; tabLabel?: string }) {
   const admin = createAdminClient();
-  const { data: posts } = await admin
+  let query = admin
     .from("posts")
     .select("id, type, title, author_name, is_pinned, views, created_at")
     .order("created_at", { ascending: false });
+  if (typeFilter) query = query.eq("type", typeFilter);
+  const { data: posts } = await query;
+
+  const newPostHref = typeFilter
+    ? `/admin/posts/new?type=${encodeURIComponent(typeFilter)}`
+    : "/admin/posts/new";
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-800">게시글 관리</h1>
-        <Link href="/admin/posts/new" className="px-4 py-2 bg-[#003876] text-white text-sm font-semibold rounded-lg hover:bg-[#002a5c] transition-colors">
+        <h1 className="text-2xl font-bold text-gray-800">{tabLabel ?? "게시글 관리"}</h1>
+        <Link href={newPostHref} className="px-4 py-2 bg-[#003876] text-white text-sm font-semibold rounded-lg hover:bg-[#002a5c] transition-colors">
           + 새 게시글
         </Link>
       </div>
@@ -640,8 +657,11 @@ export default async function AdminPage({
   searchParams: Promise<{ tab?: string }>;
 }) {
   const { tab = "dashboard" } = await searchParams;
+  const typedTab = tab as Tab;
 
-  if (tab === "posts") return <PostsTab />;
+  const typeMapping = TAB_TYPE_MAP[typedTab];
+  if (typeMapping) return <PostsTab typeFilter={typeMapping.type} tabLabel={typeMapping.label} />;
+
   if (tab === "board") return <BoardTab />;
   if (tab === "condolences") return <CondolencesTab />;
   if (tab === "users") return <UsersTab />;
@@ -649,6 +669,7 @@ export default async function AdminPage({
   if (tab === "verifications") return <VerificationsTab />;
   if (tab === "donations") return <DonationsTab />;
   if (tab === "banners") return <BannersTab />;
+  if (tab === "ad-banners") return <AdBannersTab />;
   if (tab === "gallery") return <GalleryTab />;
   if (tab === "newsletter") return <NewsletterTab />;
   if (tab === "sms") return <SMSTab />;

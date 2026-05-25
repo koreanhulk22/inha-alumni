@@ -13,24 +13,24 @@ const relatedLinks = [
   { label: "인하대학교병원", href: "https://www.inhauh.com" },
   { label: "학생진로설계포털", href: "https://career.inha.ac.kr" },
   { label: "졸업증명서 발급", href: "https://www.inha.ac.kr/kr/1083/subview.do" },
-  { label: "동문장학회", href: "https://inhaasf.com" },
+  { label: "동문장학회", href: "http://inhaasf.com/document/main/" },
 ];
 
 export function QuickMenu() {
   return (
     <section>
-      <div className="bg-[#003876]">
+      <div style={{ background: "var(--qm-bg)", transition: "background 0.3s" }}>
         <div className="max-w-7xl mx-auto px-4">
-          {/* 모바일: 3+2 그리드, 데스크탑: 5열 */}
           <div className="grid grid-cols-3 md:grid-cols-5 divide-x divide-white/15">
             {quickMenus.map((menu) => (
               <Link
                 key={menu.href}
                 href={menu.href}
-                className="flex flex-col items-center gap-2 py-5 md:py-7 hover:bg-[#002a5c] transition-colors"
+                className="flex flex-col items-center gap-2 py-5 md:py-7 transition-colors"
+                style={{ color: "var(--qm-text)" }}
               >
                 <span className="text-2xl md:text-3xl">{menu.icon}</span>
-                <span className="text-white text-xs md:text-sm font-medium text-center leading-tight">{menu.label}</span>
+                <span className="text-xs md:text-sm font-medium text-center leading-tight" style={{ color: "var(--qm-text)" }}>{menu.label}</span>
               </Link>
             ))}
           </div>

@@ -55,6 +55,16 @@
   --inha-light-blue: #e8f0fe;
   --inha-dark: #1a1a2e;
 
+  /* 전체 브랜드 테마 (ColorSwitcher로 런타임 변경 가능) */
+  --qm-bg: #003876;
+  --qm-text: #ffffff;
+  --qm-border: rgba(255,255,255,0.15);
+  --qm-hover: rgba(0,0,0,0.15);
+  --brand-primary: #003876;
+  --brand-secondary: #0066CC;
+  --shop-bg: #C8A951;
+  --donation-bg: #003876;
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);

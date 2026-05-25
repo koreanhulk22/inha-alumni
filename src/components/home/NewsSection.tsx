@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { type Post } from "@/types";
+import { ContentSlider, type SliderBanner } from "@/components/home/ContentSlider";
 
 type NewsPost = Pick<Post, "id" | "type" | "title" | "summary" | "image_url" | "created_at" | "is_pinned">;
 type CondolenceItem = { id: string; name: string | null; type: string; content: string; event_date: string | null };
@@ -8,6 +9,7 @@ type CondolenceItem = { id: string; name: string | null; type: string; content: 
 interface Props {
   posts: NewsPost[];
   condolences: CondolenceItem[];
+  slideRightBanners?: SliderBanner[];
 }
 
 const formatDate = (dateStr: string | null) => {
@@ -93,7 +95,7 @@ function CondolenceList({ condolences }: { condolences: CondolenceItem[] }) {
   );
 }
 
-export function NewsSection({ posts, condolences }: Props) {
+export function NewsSection({ posts, condolences, slideRightBanners = [] }: Props) {
   const notices   = posts.filter((p) => p.type === "공지사항");
   const mainNews  = posts.filter((p) => p.type === "총동창회소식");
   const localNews = posts.filter((p) => p.type === "단위동문회소식");
@@ -101,44 +103,54 @@ export function NewsSection({ posts, condolences }: Props) {
 
   return (
     <section className="py-10 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 flex gap-6 items-start">
 
-        {/* 총동창회 소식 — 카드 4장 */}
-        <div>
-          <div className="flex items-center justify-between border-b-2 border-[#003876] pb-3 mb-4">
-            <h3 className="text-[15px] font-bold text-gray-800">총동창회 소식</h3>
-            <Link href="/news/events" className="text-xs text-gray-400 hover:text-[#003876] transition-colors">더보기 +</Link>
+        {/* 메인 콘텐츠 */}
+        <div className="flex-1 min-w-0 space-y-6">
+
+          {/* 총동창회 소식 — 카드 4장 */}
+          <div>
+            <div className="flex items-center justify-between border-b-2 border-[#003876] pb-3 mb-4">
+              <h3 className="text-[15px] font-bold text-gray-800">총동창회 소식</h3>
+              <Link href="/news/events" className="text-xs text-gray-400 hover:text-[#003876] transition-colors">더보기 +</Link>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {mainNews.slice(0, 4).map((post) => (
+                <NewsCard key={post.id} post={post} />
+              ))}
+              {mainNews.length === 0 && Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="bg-white rounded-xl border border-dashed border-gray-200 h-48 flex items-center justify-center text-gray-300 text-xs">소식 없음</div>
+              ))}
+            </div>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {mainNews.slice(0, 4).map((post) => (
-              <NewsCard key={post.id} post={post} />
-            ))}
-            {mainNews.length === 0 && Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-xl border border-dashed border-gray-200 h-48 flex items-center justify-center text-gray-300 text-xs">소식 없음</div>
-            ))}
+
+          {/* 공지사항 */}
+          <div className="bg-white rounded border border-gray-200 p-6">
+            <SectionHeader title="공지사항" href="/news/notice" />
+            <PostList posts={notices} />
           </div>
+
+          {/* 단위동문회소식 + 동문동정 + 경조사 */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white rounded border border-gray-200 p-5">
+              <SectionHeader title="단위동문회 소식" href="/community/local-news" />
+              <PostList posts={localNews} />
+            </div>
+            <div className="bg-white rounded border border-gray-200 p-5">
+              <SectionHeader title="동문동정" href="/news/press" />
+              <PostList posts={alumniNews} />
+            </div>
+            <div className="bg-white rounded border border-gray-200 p-5">
+              <SectionHeader title="경조사 알림" href="/community/condolence" />
+              <CondolenceList condolences={condolences} />
+            </div>
+          </div>
+
         </div>
 
-        {/* 공지사항 */}
-        <div className="bg-white rounded border border-gray-200 p-6">
-          <SectionHeader title="공지사항" href="/news/notice" />
-          <PostList posts={notices} />
-        </div>
-
-        {/* 단위동문회소식 + 동문동정 + 경조사 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded border border-gray-200 p-5">
-            <SectionHeader title="단위동문회 소식" href="/community/local-news" />
-            <PostList posts={localNews} />
-          </div>
-          <div className="bg-white rounded border border-gray-200 p-5">
-            <SectionHeader title="동문동정" href="/news/press" />
-            <PostList posts={alumniNews} />
-          </div>
-          <div className="bg-white rounded border border-gray-200 p-5">
-            <SectionHeader title="경조사 알림" href="/community/condolence" />
-            <CondolenceList condolences={condolences} />
-          </div>
+        {/* 우측 슬라이드 배너 */}
+        <div className="hidden xl:block w-[166px] shrink-0 sticky top-24 self-start pt-1">
+          <ContentSlider banners={slideRightBanners} />
         </div>
 
       </div>

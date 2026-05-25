@@ -63,13 +63,13 @@ const menus = [
   },
   {
     label: "동문장학회",
-    href: "https://inhaasf.com",
+    href: "http://inhaasf.com/document/main/",
     external: true,
     children: [
-      { label: "장학회 소개", href: "https://inhaasf.com" },
-      { label: "기금 현황", href: "https://inhaasf.com" },
-      { label: "기부내역", href: "https://inhaasf.com" },
-      { label: "공지사항", href: "https://inhaasf.com" },
+      { label: "장학회 소개", href: "http://inhaasf.com/document/main/" },
+      { label: "기금 현황", href: "http://inhaasf.com/document/main/" },
+      { label: "기부내역", href: "http://inhaasf.com/document/main/" },
+      { label: "공지사항", href: "http://inhaasf.com/document/main/" },
     ],
   },
   {

@@ -27,14 +27,14 @@ export function HeroBanner({ banners }: Props) {
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
 
-  const slides = banners.length > 0 ? banners : [
+  const defaultSlides = [
     {
       id: "default-1",
       title: "인하대학교 총동창회",
       subtitle: "친목공영 | 모교후원 | 후진육영",
       image_url: "/images/hero-1.png",
       link_url: "/about/greeting",
-      sort_order: 0,
+      sort_order: -3,
     },
     {
       id: "default-2",
@@ -42,7 +42,7 @@ export function HeroBanner({ banners }: Props) {
       subtitle: "개교 71주년, 함께 만들어가는 인하의 미래",
       image_url: "/images/hero-2.jpg",
       link_url: "/about/greeting",
-      sort_order: 1,
+      sort_order: -2,
     },
     {
       id: "default-3",
@@ -50,9 +50,11 @@ export function HeroBanner({ banners }: Props) {
       subtitle: "동문 여러분의 자랑스러운 모교",
       image_url: "/images/hero-3.jpg",
       link_url: "/about/greeting",
-      sort_order: 2,
+      sort_order: -1,
     },
   ];
+
+  const slides = [...defaultSlides, ...banners];
 
   const next = useCallback(() => {
     setCurrent((prev) => (prev + 1) % slides.length);
@@ -68,7 +70,7 @@ export function HeroBanner({ banners }: Props) {
 
   return (
     <section
-      className="relative h-64 sm:h-80 md:h-[500px] overflow-hidden"
+      className="relative h-[calc(100vh-64px)] overflow-hidden"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >

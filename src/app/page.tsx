@@ -1,23 +1,27 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { GNB } from "@/components/layout/GNB";
 import { Footer } from "@/components/layout/Footer";
 import { HeroBanner } from "@/components/home/HeroBanner";
 import { QuickMenu } from "@/components/home/QuickMenu";
 import { NewsSection } from "@/components/home/NewsSection";
+import { ColorSwitcher } from "@/components/home/ColorSwitcher";
+import { SideBanners } from "@/components/home/SideBanners";
 
 function InhaShopBanner() {
   return (
-    <section className="bg-[#C8A951]">
+    <section style={{ background: "var(--shop-bg)", transition: "background 0.4s" }}>
       <div className="max-w-7xl mx-auto px-4 py-6 md:py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="text-center sm:text-left">
-          <p className="text-[#7a5f1a] text-xs font-semibold tracking-widest uppercase mb-1">동문 전용 쇼핑몰</p>
+          <p className="text-white/70 text-xs font-semibold tracking-widest uppercase mb-1">동문 전용 쇼핑몰</p>
           <h2 className="text-white text-xl md:text-2xl font-bold">인하상회 🏪</h2>
           <p className="text-white/80 text-sm mt-1">동문만을 위한 특별 할인 혜택을 확인하세요</p>
         </div>
         <Link
           href="/business/shop"
-          className="shrink-0 px-6 py-3 bg-white text-[#7a5f1a] font-bold rounded-full text-sm hover:bg-[#FFF8E7] transition-colors shadow-sm"
+          className="shrink-0 px-6 py-3 bg-white font-bold rounded-full text-sm hover:bg-white/90 transition-colors shadow-sm"
+          style={{ color: "var(--brand-primary)" }}
         >
           인하상회 바로가기 →
         </Link>
@@ -27,10 +31,10 @@ function InhaShopBanner() {
 }
 
 const bizItems = [
-  { label: "인하사랑카드", desc: "카드 신청 및 혜택", href: "/business/card", bg: "bg-[#003876]" },
-  { label: "인하플레이스", desc: "동문 업소 찾기", href: "/business/place", bg: "bg-[#0066CC]" },
-  { label: "인하사랑콘서트", desc: "문화 공연 티켓", href: "/business/concert", bg: "bg-[#1A1A2E]" },
-  { label: "창업지원", desc: "동문 창업 네트워크", href: "/business/startup", bg: "bg-[#555]" },
+  { label: "인하사랑카드", desc: "카드 신청 및 혜택", href: "/business/card", cssVar: "--brand-primary" },
+  { label: "인하플레이스", desc: "동문 업소 찾기", href: "/business/place", cssVar: "--brand-secondary" },
+  { label: "인하사랑콘서트", desc: "문화 공연 티켓", href: "/business/concert", fixedBg: "#1A1A2E" },
+  { label: "창업지원", desc: "동문 창업 네트워크", href: "/business/startup", fixedBg: "#555" },
 ];
 
 function DonationDashboard() {
@@ -40,7 +44,7 @@ function DonationDashboard() {
     { label: "동문회관 건립기금", current: 23 },
   ];
   return (
-    <section className="bg-[#003876] py-12 md:py-16">
+    <section className="py-12 md:py-16" style={{ background: "var(--donation-bg)", transition: "background 0.4s" }}>
       <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
         <div>
           <p className="text-[#C8A951] text-xs font-semibold tracking-widest uppercase mb-2">Donate &amp; Membership</p>
@@ -90,7 +94,8 @@ function BizSection() {
             <Link
               key={item.href}
               href={item.href}
-              className={`${item.bg} rounded-lg p-4 md:p-6 flex flex-col gap-1.5 md:gap-2 hover:opacity-90 transition-opacity`}
+              className="rounded-lg p-4 md:p-6 flex flex-col gap-1.5 md:gap-2 hover:opacity-90 transition-all duration-300"
+              style={{ background: item.cssVar ? `var(${item.cssVar})` : item.fixedBg }}
             >
               <span className="text-white font-bold text-sm md:text-base">{item.label}</span>
               <span className="text-white/70 text-xs">{item.desc}</span>
@@ -105,7 +110,8 @@ function BizSection() {
 export default async function HomePage() {
   const supabase = await createClient();
 
-  const [{ data: posts }, { data: banners }, { data: condolences }] = await Promise.all([
+  const admin = createAdminClient();
+  const [{ data: posts }, { data: banners }, { data: condolences }, { data: adBanners }] = await Promise.all([
     supabase
       .from("posts")
       .select("id, type, title, summary, image_url, created_at, is_pinned")
@@ -122,7 +128,18 @@ export default async function HomePage() {
       .select("id, name, type, content, event_date")
       .order("created_at", { ascending: false })
       .limit(6),
+    admin
+      .from("ad_banners" as never)
+      .select("id, zone, title, image_url, link_url, sort_order")
+      .eq("is_active", true)
+      .order("sort_order")
+      .then((r: { data: unknown }) => ({ data: (r.data ?? []) as Array<{ id: string; zone: string; title: string | null; image_url: string | null; link_url: string | null; sort_order: number }> })),
   ]);
+
+  const allAdBanners = (adBanners ?? []) as Array<{ id: string; zone: string; title: string | null; image_url: string | null; link_url: string | null; sort_order: number }>;
+  const leftBanners = allAdBanners.filter((b) => b.zone === "side_left");
+  const rightBanners = allAdBanners.filter((b) => b.zone === "side_right");
+  const slideRightBanners = allAdBanners.filter((b) => b.zone === "slide_right");
 
   return (
     <div className="min-h-screen flex flex-col font-[Pretendard,system-ui,sans-serif]">
@@ -132,10 +149,12 @@ export default async function HomePage() {
         <QuickMenu />
         <InhaShopBanner />
         <BizSection />
-        <NewsSection posts={posts ?? []} condolences={condolences ?? []} />
+        <NewsSection posts={posts ?? []} condolences={condolences ?? []} slideRightBanners={slideRightBanners} />
         <DonationDashboard />
       </main>
       <Footer />
+      <SideBanners leftBanners={leftBanners} rightBanners={rightBanners} />
+      <ColorSwitcher />
     </div>
   );
 }

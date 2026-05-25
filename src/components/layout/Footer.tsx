@@ -56,8 +56,8 @@ export function Footer() {
               { label: "인하대학교병원", href: "https://www.inhauh.com" },
               { label: "학생진로설계포털", href: "https://career.inha.ac.kr" },
               { label: "졸업증명서 발급", href: "https://www.inha.ac.kr/kr/1083/subview.do" },
-              { label: "동문장학회", href: "https://inhaasf.com" },
-              { label: "인하상회", href: "https://inhamart.com" },
+              { label: "동문장학회", href: "http://inhaasf.com/document/main/" },
+              { label: "인하상회", href: "https://www.inhamart.com/main/index.php" },
             ].map((link) => (
               <a
                 key={link.href}

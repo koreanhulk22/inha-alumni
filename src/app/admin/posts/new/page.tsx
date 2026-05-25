@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createPost } from "../../actions";
 
 const POST_TYPES = [
@@ -9,8 +9,20 @@ const POST_TYPES = [
   "동문동정", "인터뷰/칼럼", "자유게시판", "구인구직",
 ];
 
+const TYPE_TAB_MAP: Record<string, string> = {
+  "공지사항": "notice",
+  "총동창회소식": "news",
+  "단위동문회소식": "local",
+  "모교소식": "university",
+  "동문동정": "alumni-news",
+  "인터뷰/칼럼": "column",
+  "구인구직": "jobs",
+};
+
 export default function NewPostPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const defaultType = searchParams.get("type") ?? POST_TYPES[0];
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -21,7 +33,9 @@ export default function NewPostPage() {
     try {
       const formData = new FormData(e.currentTarget);
       await createPost(formData);
-      router.push("/admin?tab=posts");
+      const type = formData.get("type") as string;
+      const tab = TYPE_TAB_MAP[type] ?? "notice";
+      router.push(`/admin?tab=${tab}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "오류가 발생했습니다");
       setLoading(false);
@@ -36,7 +50,7 @@ export default function NewPostPage() {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">분류 *</label>
-            <select name="type" required className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#003876]">
+            <select name="type" required defaultValue={defaultType} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#003876]">
               {POST_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
             </select>
           </div>

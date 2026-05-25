@@ -23,10 +23,10 @@ export function BoardList({ posts, detailBase = "/news" }: Props) {
     <table className="w-full text-sm">
       <thead className="bg-gray-50 border-b border-gray-200">
         <tr>
-          <th className="py-3 px-4 text-left text-gray-500 font-medium w-12">번호</th>
+          <th className="py-3 px-4 text-center text-gray-500 font-medium w-14 whitespace-nowrap">번호</th>
           <th className="py-3 px-4 text-left text-gray-500 font-medium">제목</th>
-          <th className="py-3 px-4 text-center text-gray-500 font-medium w-28 hidden md:table-cell">등록일</th>
-          <th className="py-3 px-4 text-center text-gray-500 font-medium w-16 hidden md:table-cell">조회</th>
+          <th className="py-3 px-4 text-center text-gray-500 font-medium w-32 whitespace-nowrap hidden md:table-cell">등록일</th>
+          <th className="py-3 px-4 text-center text-gray-500 font-medium w-16 whitespace-nowrap hidden md:table-cell">조회</th>
         </tr>
       </thead>
       <tbody className="divide-y divide-gray-100">
@@ -45,7 +45,7 @@ export function BoardList({ posts, detailBase = "/news" }: Props) {
               </Link>
               {post.summary && <p className="text-xs text-gray-400 mt-0.5 truncate">{post.summary}</p>}
             </td>
-            <td className="py-3.5 px-4 text-center text-gray-400 hidden md:table-cell">{formatDate(post.created_at)}</td>
+            <td className="py-3.5 px-4 text-center text-gray-400 whitespace-nowrap hidden md:table-cell">{formatDate(post.created_at)}</td>
             <td className="py-3.5 px-4 text-center text-gray-400 hidden md:table-cell">{post.views}</td>
           </tr>
         ))}
