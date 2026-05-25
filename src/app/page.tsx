@@ -6,26 +6,6 @@ import { HeroBanner } from "@/components/home/HeroBanner";
 import { QuickMenu } from "@/components/home/QuickMenu";
 import { NewsSection } from "@/components/home/NewsSection";
 
-function InhaShopBanner() {
-  return (
-    <section className="bg-[#C8A951]">
-      <div className="max-w-7xl mx-auto px-4 py-6 md:py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="text-center sm:text-left">
-          <p className="text-[#7a5f1a] text-xs font-semibold tracking-widest uppercase mb-1">동문 전용 쇼핑몰</p>
-          <h2 className="text-white text-xl md:text-2xl font-bold">인하상회 🏪</h2>
-          <p className="text-white/80 text-sm mt-1">동문만을 위한 특별 할인 혜택을 확인하세요</p>
-        </div>
-        <Link
-          href="/business/shop"
-          className="shrink-0 px-6 py-3 bg-white text-[#7a5f1a] font-bold rounded-full text-sm hover:bg-[#FFF8E7] transition-colors shadow-sm"
-        >
-          인하상회 바로가기 →
-        </Link>
-      </div>
-    </section>
-  );
-}
-
 const bizItems = [
   { label: "인하사랑카드", desc: "카드 신청 및 혜택", href: "/business/card", bg: "bg-[#003876]" },
   { label: "인하플레이스", desc: "동문 업소 찾기", href: "/business/place", bg: "bg-[#0066CC]" },
@@ -105,7 +85,7 @@ function BizSection() {
 export default async function HomePage() {
   const supabase = await createClient();
 
-  const [{ data: posts }, { data: banners }, { data: condolences }] = await Promise.all([
+  const [{ data: posts }, { data: banners }, { data: condolences }, { data: colorSetting }] = await Promise.all([
     supabase
       .from("posts")
       .select("id, type, title, summary, image_url, created_at, is_pinned")
@@ -122,6 +102,11 @@ export default async function HomePage() {
       .select("id, name, type, content, event_date")
       .order("created_at", { ascending: false })
       .limit(6),
+    supabase
+      .from("site_settings")
+      .select("value")
+      .eq("key", "quickmenu_color")
+      .maybeSingle(),
   ]);
 
   return (
@@ -129,8 +114,7 @@ export default async function HomePage() {
       <GNB />
       <main className="flex-1">
         <HeroBanner banners={banners ?? []} />
-        <QuickMenu />
-        <InhaShopBanner />
+        <QuickMenu color={colorSetting?.value ?? "#003876"} />
         <BizSection />
         <NewsSection posts={posts ?? []} condolences={condolences ?? []} />
         <DonationDashboard />

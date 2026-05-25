@@ -9,6 +9,17 @@ interface Setting {
   label: string | null;
 }
 
+const BLUE_SHADES = [
+  { color: "#003876", name: "인하 기본" },
+  { color: "#0A2342", name: "미드나잇 네이비" },
+  { color: "#1A237E", name: "인디고" },
+  { color: "#0D47A1", name: "딥 블루" },
+  { color: "#1565C0", name: "미디엄 블루" },
+  { color: "#0277BD", name: "오션 블루" },
+  { color: "#01579B", name: "스틸 블루" },
+  { color: "#0C3547", name: "다크 틸" },
+];
+
 const SECTIONS = [
   {
     title: "문자 서비스 설정",
@@ -124,6 +135,58 @@ export default function SettingsTab() {
           </div>
         </div>
       ))}
+
+      {/* 퀵메뉴 배경색 */}
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="px-5 py-4 border-b border-gray-100">
+          <h2 className="text-base font-bold text-gray-700">디자인 설정</h2>
+          <p className="text-xs text-gray-400 mt-0.5">메인 페이지 퀵메뉴 띠 색상 (파란색 계열)</p>
+        </div>
+        <div className="px-5 py-5">
+          <p className="text-xs font-semibold text-gray-600 mb-3">퀵메뉴 배경색</p>
+          <div className="flex flex-wrap gap-3 mb-4">
+            {BLUE_SHADES.map((shade) => {
+              const isActive = (editing["quickmenu_color"] ?? "#003876") === shade.color;
+              const wasSaved = saved === "quickmenu_color";
+              return (
+                <button
+                  key={shade.color}
+                  onClick={() => setEditing((prev) => ({ ...prev, quickmenu_color: shade.color }))}
+                  className={`flex flex-col items-center gap-1.5 p-2 rounded-lg border-2 transition-all ${
+                    isActive ? "border-[#003876]" : "border-transparent hover:border-gray-200"
+                  }`}
+                >
+                  <span
+                    className="w-10 h-10 rounded-lg shadow-sm block"
+                    style={{ backgroundColor: shade.color }}
+                  />
+                  <span className="text-[10px] text-gray-500 leading-tight text-center w-16">{shade.name}</span>
+                </button>
+              );
+            })}
+          </div>
+          <div className="flex items-center gap-3">
+            <div
+              className="w-8 h-8 rounded-md shrink-0 border border-gray-200"
+              style={{ backgroundColor: editing["quickmenu_color"] ?? "#003876" }}
+            />
+            <span className="text-xs font-mono text-gray-500">{editing["quickmenu_color"] ?? "#003876"}</span>
+            <button
+              onClick={() => handleSave("quickmenu_color")}
+              disabled={editing["quickmenu_color"] === settings["quickmenu_color"] || saving === "quickmenu_color"}
+              className={`ml-auto text-xs px-4 py-2 rounded-lg font-semibold transition-colors ${
+                saved === "quickmenu_color"
+                  ? "bg-green-50 text-green-600"
+                  : editing["quickmenu_color"] !== settings["quickmenu_color"]
+                  ? "bg-[#003876] text-white hover:bg-[#002a5c]"
+                  : "bg-gray-100 text-gray-400 cursor-not-allowed"
+              }`}
+            >
+              {saving === "quickmenu_color" ? "저장 중" : saved === "quickmenu_color" ? "저장됨 ✓" : "저장"}
+            </button>
+          </div>
+        </div>
+      </div>
 
       <div className="bg-[#E8F0FE] rounded-xl p-4 text-xs text-[#003876] leading-relaxed">
         <p className="font-bold mb-1">💡 문자 서비스 변경 안내</p>

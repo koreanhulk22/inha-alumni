@@ -4,7 +4,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 const ALLOWED_IMAGE = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const ALLOWED_PDF   = ["application/pdf"];
-const MAX_SIZE      = 20 * 1024 * 1024; // 20MB
+const ALLOWED_VIDEO = ["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo"];
+const ALLOWED_POST_MEDIA = [...ALLOWED_IMAGE, ...ALLOWED_VIDEO];
+const MAX_SIZE      = 200 * 1024 * 1024; // 200MB (동영상 고려)
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -16,12 +18,16 @@ export async function POST(request: NextRequest) {
 
   const formData = await request.formData();
   const file = formData.get("file") as File | null;
-  const bucket = formData.get("bucket") as string | null; // "gallery-images" | "newsletter-pdfs"
+  const bucket = formData.get("bucket") as string | null;
 
   if (!file || !bucket) return NextResponse.json({ error: "파일과 버킷을 지정해주세요." }, { status: 400 });
-  if (file.size > MAX_SIZE) return NextResponse.json({ error: "파일 크기는 20MB 이하여야 합니다." }, { status: 400 });
+  if (file.size > MAX_SIZE) return NextResponse.json({ error: "파일 크기는 200MB 이하여야 합니다." }, { status: 400 });
 
-  const allowed = bucket === "newsletter-pdfs" ? ALLOWED_PDF : ALLOWED_IMAGE;
+  let allowed: string[];
+  if (bucket === "newsletter-pdfs") allowed = ALLOWED_PDF;
+  else if (bucket === "post-media") allowed = ALLOWED_POST_MEDIA;
+  else allowed = ALLOWED_IMAGE;
+
   if (!allowed.includes(file.type)) {
     return NextResponse.json({ error: `허용되지 않는 파일 형식입니다. (${allowed.join(", ")})` }, { status: 400 });
   }

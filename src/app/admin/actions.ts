@@ -17,6 +17,7 @@ export async function createPost(formData: FormData) {
   await requireAdmin();
   const admin = createAdminClient();
   const imageUrl = formData.get("image_url") as string;
+  const attachments = formData.getAll("attachments").filter(Boolean) as string[];
   const { error } = await admin.from("posts").insert({
     type: formData.get("type") as string,
     title: formData.get("title") as string,
@@ -25,6 +26,7 @@ export async function createPost(formData: FormData) {
     image_url: imageUrl || null,
     is_pinned: formData.get("is_pinned") === "true",
     author_name: formData.get("author_name") as string || "총동창회",
+    attachments: attachments.length > 0 ? attachments : null,
   });
   if (error) throw new Error(error.message);
   revalidatePath("/admin");
@@ -36,6 +38,7 @@ export async function updatePost(id: string, formData: FormData) {
   await requireAdmin();
   const admin = createAdminClient();
   const imageUrl = formData.get("image_url") as string;
+  const attachments = formData.getAll("attachments").filter(Boolean) as string[];
   const { error } = await admin.from("posts").update({
     type: formData.get("type") as string,
     title: formData.get("title") as string,
@@ -44,6 +47,7 @@ export async function updatePost(id: string, formData: FormData) {
     image_url: imageUrl || null,
     is_pinned: formData.get("is_pinned") === "true",
     author_name: formData.get("author_name") as string || "총동창회",
+    attachments: attachments.length > 0 ? attachments : null,
   }).eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/admin");

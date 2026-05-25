@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createPost } from "../../actions";
+import { MediaUploadWidget } from "@/components/admin/MediaUploadWidget";
 
 const POST_TYPES = [
   "공지사항", "총동창회소식", "단위동문회소식", "모교소식",
@@ -13,6 +14,8 @@ export default function NewPostPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [thumbnailUrl, setThumbnailUrl] = useState("");
+  const [attachments, setAttachments] = useState<string[]>([]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -20,6 +23,8 @@ export default function NewPostPage() {
     setError("");
     try {
       const formData = new FormData(e.currentTarget);
+      formData.set("image_url", thumbnailUrl);
+      attachments.forEach((url) => formData.append("attachments", url));
       await createPost(formData);
       router.push("/admin?tab=posts");
     } catch (err) {
@@ -56,9 +61,13 @@ export default function NewPostPage() {
           <input name="summary" placeholder="한 줄 요약 (선택사항)" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#003876]" />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">썸네일 이미지 URL</label>
-          <input name="image_url" placeholder="https://... (없으면 기본 카드 배경 표시)" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#003876]" />
+        <div className="border border-gray-200 rounded-xl p-4">
+          <MediaUploadWidget
+            thumbnailUrl={thumbnailUrl}
+            attachments={attachments}
+            onChangeThumbnail={setThumbnailUrl}
+            onChangeAttachments={setAttachments}
+          />
         </div>
 
         <div>

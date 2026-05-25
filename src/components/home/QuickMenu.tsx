@@ -16,18 +16,21 @@ const relatedLinks = [
   { label: "동문장학회", href: "https://inhaasf.com" },
 ];
 
-export function QuickMenu() {
+interface Props {
+  color?: string;
+}
+
+export function QuickMenu({ color = "#003876" }: Props) {
   return (
     <section>
-      <div className="bg-[#003876]">
+      <div style={{ backgroundColor: color }}>
         <div className="max-w-7xl mx-auto px-4">
-          {/* 모바일: 3+2 그리드, 데스크탑: 5열 */}
           <div className="grid grid-cols-3 md:grid-cols-5 divide-x divide-white/15">
             {quickMenus.map((menu) => (
               <Link
                 key={menu.href}
                 href={menu.href}
-                className="flex flex-col items-center gap-2 py-5 md:py-7 hover:bg-[#002a5c] transition-colors"
+                className="flex flex-col items-center gap-2 py-5 md:py-7 hover:brightness-90 transition-all"
               >
                 <span className="text-2xl md:text-3xl">{menu.icon}</span>
                 <span className="text-white text-xs md:text-sm font-medium text-center leading-tight">{menu.label}</span>

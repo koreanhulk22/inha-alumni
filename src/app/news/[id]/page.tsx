@@ -1,7 +1,32 @@
 import { createClient } from "@/lib/supabase/server";
 import { SubPageLayout } from "@/components/layout/SubPageLayout";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
+
+function isVideoUrl(url: string) {
+  return /\.(mp4|webm|mov|avi)(\?|$)/i.test(url);
+}
+
+function AttachmentsSection({ attachments }: { attachments: string[] }) {
+  if (attachments.length === 0) return null;
+  return (
+    <div className="px-6 py-4 border-t border-gray-100 space-y-3">
+      <p className="text-sm font-semibold text-gray-600">첨부 파일</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {attachments.map((url, i) => (
+          isVideoUrl(url) ? (
+            <video key={i} src={url} controls className="w-full rounded-lg border border-gray-200" />
+          ) : (
+            <div key={i} className="relative w-full aspect-video rounded-lg overflow-hidden border border-gray-200">
+              <Image src={url} alt={`첨부 ${i + 1}`} fill className="object-contain bg-gray-50" />
+            </div>
+          )
+        ))}
+      </div>
+    </div>
+  );
+}
 
 const TYPE_CONFIG: Record<string, {
   sideMenus: { label: string; href: string }[];
@@ -140,6 +165,10 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
         <div className="px-6 py-8 min-h-48">
           <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{post.content}</p>
         </div>
+
+        {post.attachments && post.attachments.length > 0 && (
+          <AttachmentsSection attachments={post.attachments} />
+        )}
 
         <div className="px-6 py-4 border-t border-gray-100">
           <Link href={config.listHref} className="text-sm text-gray-500 hover:text-[#003876] transition-colors">

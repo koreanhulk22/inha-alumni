@@ -68,7 +68,7 @@ export function HeroBanner({ banners }: Props) {
 
   return (
     <section
-      className="relative h-64 sm:h-80 md:h-[500px] overflow-hidden"
+      className="relative h-[calc(100vh-64px)] overflow-hidden"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
