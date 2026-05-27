@@ -17,13 +17,15 @@ import {
 // ─── 클라이언트 컴포넌트 탭 (자체 데이터 로딩) ────────────────────
 import CondolencesTab from "./condolences/page";
 import BannersTab from "./banners/page";
+import AdSlidesTab from "./ad-slides/page";
+import SideBannersTab from "./side-banners/page";
 import SMSTab from "./sms/SMSTab";
 import GalleryTab from "./gallery/GalleryTab";
 import NewsletterTab from "./newsletter/NewsletterTab";
 import SettingsTab from "./settings/SettingsTab";
 
 // ─── 타입 ──────────────────────────────────────────────────────────
-type Tab = "dashboard" | "posts" | "board" | "users" | "businesses" | "verifications" | "donations" | "condolences" | "banners" | "sms" | "gallery" | "newsletter" | "settings";
+type Tab = "dashboard" | "posts" | "board" | "users" | "businesses" | "verifications" | "donations" | "condolences" | "banners" | "ad_slides" | "side_banners" | "sms" | "gallery" | "newsletter" | "settings";
 
 // ─── 대시보드 ──────────────────────────────────────────────────────
 async function DashboardTab() {
@@ -649,6 +651,8 @@ export default async function AdminPage({
   if (tab === "verifications") return <VerificationsTab />;
   if (tab === "donations") return <DonationsTab />;
   if (tab === "banners") return <BannersTab />;
+  if (tab === "ad_slides") return <AdSlidesTab />;
+  if (tab === "side_banners") return <SideBannersTab />;
   if (tab === "gallery") return <GalleryTab />;
   if (tab === "newsletter") return <NewsletterTab />;
   if (tab === "sms") return <SMSTab />;

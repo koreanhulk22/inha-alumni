@@ -2,38 +2,40 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { createBanner, updateBanner, deleteBanner, toggleBanner } from "../actions";
+import { createAdSlide, updateAdSlide, deleteAdSlide, toggleAdSlide } from "../actions";
 import { createClient } from "@/lib/supabase/client";
 
-interface Banner {
+interface AdSlide {
   id: string;
   title: string;
-  subtitle: string | null;
+  label: string | null;
   image_url: string | null;
   link_url: string | null;
   sort_order: number;
   is_active: boolean;
 }
 
-export default function AdminBannersPage() {
-  const [banners, setBanners] = useState<Banner[]>([]);
+export default function AdminAdSlidesPage() {
+  const [slides, setSlides] = useState<AdSlide[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<Partial<Banner>>({});
+  const [editForm, setEditForm] = useState<Partial<AdSlide>>({});
 
   const imageInputRef = useRef<HTMLInputElement>(null);
-  const editImageInputRef = useRef<HTMLInputElement>(null);
   const [imageUrl, setImageUrl] = useState("");
   const [uploading, setUploading] = useState(false);
+
+  const editImageInputRef = useRef<HTMLInputElement>(null);
+  const [editImageUrl, setEditImageUrl] = useState("");
   const [editUploading, setEditUploading] = useState(false);
 
-  async function loadBanners() {
-    const { data } = await createClient().from("banners").select("*").order("sort_order");
-    setBanners(data ?? []);
+  async function loadSlides() {
+    const { data } = await createClient().from("ad_slides").select("*").order("sort_order");
+    setSlides(data ?? []);
   }
 
-  useEffect(() => { loadBanners(); }, []);
+  useEffect(() => { loadSlides(); }, []);
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -57,7 +59,11 @@ export default function AdminBannersPage() {
     fd.append("bucket", "post-media");
     const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
     const json = await res.json();
-    if (res.ok) setEditForm((prev) => ({ ...prev, image_url: json.url }));
+    if (res.ok) {
+      const url = json.url;
+      setEditImageUrl(url);
+      setEditForm((prev) => ({ ...prev, image_url: url }));
+    }
     setEditUploading(false);
   }
 
@@ -65,47 +71,48 @@ export default function AdminBannersPage() {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.currentTarget);
-    formData.set("image_url", imageUrl);
-    await createBanner(formData);
+    await createAdSlide(formData);
     setShowForm(false);
     setImageUrl("");
     setLoading(false);
-    loadBanners();
+    loadSlides();
   }
 
   async function handleUpdate(id: string) {
     setLoading(true);
     const formData = new FormData();
     formData.append("title", editForm.title ?? "");
-    formData.append("subtitle", editForm.subtitle ?? "");
-    formData.append("image_url", editForm.image_url ?? "");
+    formData.append("label", editForm.label ?? "총동창회 업무 제휴 협력 기업");
+    formData.append("image_url", editImageUrl || (editForm.image_url ?? ""));
     formData.append("link_url", editForm.link_url ?? "");
     formData.append("sort_order", String(editForm.sort_order ?? 0));
-    await updateBanner(id, formData);
+    await updateAdSlide(id, formData);
     setEditingId(null);
+    setEditImageUrl("");
     setLoading(false);
-    loadBanners();
+    loadSlides();
   }
 
   async function handleDelete(id: string) {
     if (!confirm("삭제하시겠습니까?")) return;
-    await deleteBanner(id);
-    loadBanners();
+    await deleteAdSlide(id);
+    loadSlides();
   }
 
   async function handleToggle(id: string, current: boolean) {
-    await toggleBanner(id, !current);
-    loadBanners();
+    await toggleAdSlide(id, !current);
+    loadSlides();
   }
 
-  function startEdit(banner: Banner) {
-    setEditingId(banner.id);
+  function startEdit(slide: AdSlide) {
+    setEditingId(slide.id);
+    setEditImageUrl("");
     setEditForm({
-      title: banner.title,
-      subtitle: banner.subtitle ?? "",
-      image_url: banner.image_url ?? "",
-      link_url: banner.link_url ?? "",
-      sort_order: banner.sort_order,
+      title: slide.title,
+      label: slide.label ?? "총동창회 업무 제휴 협력 기업",
+      image_url: slide.image_url ?? "",
+      link_url: slide.link_url ?? "",
+      sort_order: slide.sort_order,
     });
   }
 
@@ -113,23 +120,21 @@ export default function AdminBannersPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">배너 관리 (히어로)</h1>
-          <p className="text-sm text-amber-600 mt-0.5 bg-amber-50 px-2 py-1 rounded inline-block">
-            히어로 배너가 없으면 기본 이미지 3장이 자동으로 표시됩니다.
-          </p>
+          <h1 className="text-2xl font-bold text-gray-800">슬라이드 광고 관리</h1>
+          <p className="text-sm text-gray-400 mt-0.5">총동창회 협력 기업 슬라이드 배너</p>
         </div>
         <button onClick={() => setShowForm(!showForm)} className="px-4 py-2 bg-[#003876] text-white text-sm font-semibold rounded-lg hover:bg-[#002a5c] transition-colors">
-          {showForm ? "취소" : "+ 새 배너"}
+          {showForm ? "취소" : "+ 새 슬라이드"}
         </button>
       </div>
 
       {showForm && (
         <form onSubmit={handleCreate} className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
-          <h2 className="text-base font-bold text-gray-700">새 배너 추가</h2>
+          <h2 className="text-base font-bold text-gray-700">새 슬라이드 추가</h2>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-gray-600 mb-1.5">제목 *</label>
-              <input name="title" required placeholder="배너 제목" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#003876]" />
+              <input name="title" required placeholder="협력 기업명 또는 슬라이드 제목" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#003876]" />
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-600 mb-1.5">순서</label>
@@ -137,28 +142,29 @@ export default function AdminBannersPage() {
             </div>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1.5">부제목</label>
-            <input name="subtitle" placeholder="부제목 (선택)" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#003876]" />
+            <label className="block text-xs font-semibold text-gray-600 mb-1.5">라벨 (배지 텍스트)</label>
+            <input name="label" defaultValue="총동창회 업무 제휴 협력 기업" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#003876]" />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1.5">배경 이미지</label>
+            <label className="block text-xs font-semibold text-gray-600 mb-1.5">광고 이미지</label>
             <div className="flex items-center gap-3">
               <button type="button" onClick={() => imageInputRef.current?.click()}
                 className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors">
                 {uploading ? "업로드 중..." : "이미지 업로드"}
               </button>
               <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-              {imageUrl && <span className="text-xs text-green-600 font-medium">✓ 업로드 완료</span>}
+              {imageUrl && <span className="text-xs text-green-600 font-medium">업로드 완료</span>}
             </div>
             {imageUrl && (
               <div className="mt-2 relative w-40 h-20 rounded overflow-hidden border border-gray-200">
-                <Image src={imageUrl} alt="preview" fill className="object-cover" unoptimized />
+                <Image src={imageUrl} alt="preview" fill className="object-cover" />
               </div>
             )}
+            <input type="hidden" name="image_url" value={imageUrl} />
           </div>
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1.5">링크 URL</label>
-            <input name="link_url" placeholder="/news/notice 또는 https://..." className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#003876]" />
+            <input name="link_url" placeholder="https://... 또는 /business/..." className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#003876]" />
           </div>
           <button type="submit" disabled={loading} className="px-5 py-2 bg-[#003876] text-white text-sm font-semibold rounded-lg hover:bg-[#002a5c] disabled:opacity-40">
             {loading ? "저장 중..." : "저장"}
@@ -171,47 +177,49 @@ export default function AdminBannersPage() {
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               <th className="py-3 px-4 text-center text-gray-500 font-medium w-12">순서</th>
-              <th className="py-3 px-4 text-left text-gray-500 font-medium hidden md:table-cell w-16">이미지</th>
-              <th className="py-3 px-4 text-left text-gray-500 font-medium">제목 / 링크</th>
+              <th className="py-3 px-4 text-left text-gray-500 font-medium hidden md:table-cell w-20">이미지</th>
+              <th className="py-3 px-4 text-left text-gray-500 font-medium">제목 / 라벨</th>
               <th className="py-3 px-4 text-center text-gray-500 font-medium w-20">상태</th>
               <th className="py-3 px-4 text-center text-gray-500 font-medium w-28">관리</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {banners.map((banner) => (
+            {slides.map((slide) => (
               <>
-                <tr key={banner.id} className="hover:bg-gray-50">
-                  <td className="py-3 px-4 text-center text-gray-400">{banner.sort_order}</td>
+                <tr key={slide.id} className="hover:bg-gray-50">
+                  <td className="py-3 px-4 text-center text-gray-400">{slide.sort_order}</td>
                   <td className="py-3 px-4 hidden md:table-cell">
-                    {banner.image_url ? (
-                      <img src={banner.image_url} alt="" className="w-14 h-9 object-cover rounded" />
+                    {slide.image_url ? (
+                      <div className="relative w-16 h-10 rounded overflow-hidden border border-gray-200">
+                        <Image src={slide.image_url} alt={slide.title} fill className="object-cover" />
+                      </div>
                     ) : (
-                      <div className="w-14 h-9 bg-linear-to-r from-[#003876] to-[#0066CC] rounded" />
+                      <div className="w-16 h-10 bg-gray-100 rounded flex items-center justify-center text-xs text-gray-400">없음</div>
                     )}
                   </td>
                   <td className="py-3 px-4">
-                    <p className="font-medium text-gray-800">{banner.title}</p>
-                    {banner.subtitle && <p className="text-xs text-gray-400">{banner.subtitle}</p>}
-                    {banner.link_url && <p className="text-xs text-gray-400 mt-0.5">{banner.link_url}</p>}
+                    <p className="font-medium text-gray-800">{slide.title}</p>
+                    {slide.label && <p className="text-xs text-[#003876] mt-0.5">{slide.label}</p>}
+                    {slide.link_url && <p className="text-xs text-gray-400 mt-0.5 truncate max-w-xs">{slide.link_url}</p>}
                   </td>
                   <td className="py-3 px-4 text-center">
-                    <button onClick={() => handleToggle(banner.id, banner.is_active)} className={`text-xs px-3 py-1 rounded-full font-medium transition-colors ${
-                      banner.is_active ? "bg-green-50 text-green-600" : "bg-gray-100 text-gray-400"
+                    <button onClick={() => handleToggle(slide.id, slide.is_active)} className={`text-xs px-3 py-1 rounded-full font-medium transition-colors ${
+                      slide.is_active ? "bg-green-50 text-green-600" : "bg-gray-100 text-gray-400"
                     }`}>
-                      {banner.is_active ? "활성" : "비활성"}
+                      {slide.is_active ? "활성" : "비활성"}
                     </button>
                   </td>
                   <td className="py-3 px-4 text-center">
                     <div className="flex items-center justify-center gap-2">
-                      <button onClick={() => editingId === banner.id ? setEditingId(null) : startEdit(banner)} className="text-xs text-[#003876] hover:underline">
-                        {editingId === banner.id ? "취소" : "수정"}
+                      <button onClick={() => editingId === slide.id ? setEditingId(null) : startEdit(slide)} className="text-xs text-[#003876] hover:underline">
+                        {editingId === slide.id ? "취소" : "수정"}
                       </button>
-                      <button onClick={() => handleDelete(banner.id)} className="text-xs text-red-400 hover:underline">삭제</button>
+                      <button onClick={() => handleDelete(slide.id)} className="text-xs text-red-400 hover:underline">삭제</button>
                     </div>
                   </td>
                 </tr>
-                {editingId === banner.id && (
-                  <tr key={`edit-${banner.id}`} className="bg-[#F8FAFF]">
+                {editingId === slide.id && (
+                  <tr key={`edit-${slide.id}`} className="bg-[#F8FAFF]">
                     <td colSpan={5} className="px-4 py-4">
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         <div>
@@ -220,8 +228,8 @@ export default function AdminBannersPage() {
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#003876]" />
                         </div>
                         <div>
-                          <label className="block text-xs font-semibold text-gray-600 mb-1">부제목</label>
-                          <input value={editForm.subtitle ?? ""} onChange={(e) => setEditForm({ ...editForm, subtitle: e.target.value })}
+                          <label className="block text-xs font-semibold text-gray-600 mb-1">라벨</label>
+                          <input value={editForm.label ?? ""} onChange={(e) => setEditForm({ ...editForm, label: e.target.value })}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#003876]" />
                         </div>
                         <div>
@@ -235,26 +243,22 @@ export default function AdminBannersPage() {
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#003876]" />
                         </div>
                       </div>
-
-                      {/* 이미지 업로드 */}
                       <div className="mt-3">
-                        <label className="block text-xs font-semibold text-gray-600 mb-1.5">배경 이미지</label>
+                        <label className="block text-xs font-semibold text-gray-600 mb-1">이미지 교체</label>
                         <div className="flex items-center gap-3">
                           <button type="button" onClick={() => editImageInputRef.current?.click()}
                             className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors">
                             {editUploading ? "업로드 중..." : "이미지 업로드"}
                           </button>
                           <input ref={editImageInputRef} type="file" accept="image/*" className="hidden" onChange={handleEditImageUpload} />
-                          {editForm.image_url && (
+                          {(editImageUrl || editForm.image_url) && (
                             <div className="relative w-24 h-14 rounded overflow-hidden border border-gray-200">
-                              <img src={editForm.image_url} alt="preview" className="w-full h-full object-cover" />
+                              <Image src={editImageUrl || editForm.image_url!} alt="preview" fill className="object-cover" />
                             </div>
                           )}
-                          {editForm.image_url && <span className="text-xs text-green-600">✓ 이미지 있음</span>}
                         </div>
                       </div>
-
-                      <button onClick={() => handleUpdate(banner.id)} disabled={loading}
+                      <button onClick={() => handleUpdate(slide.id)} disabled={loading}
                         className="mt-3 px-5 py-2 bg-[#003876] text-white text-sm font-semibold rounded-lg hover:bg-[#002a5c] disabled:opacity-40">
                         {loading ? "저장 중..." : "수정 저장"}
                       </button>
@@ -263,8 +267,8 @@ export default function AdminBannersPage() {
                 )}
               </>
             ))}
-            {banners.length === 0 && (
-              <tr><td colSpan={5} className="py-16 text-center text-gray-400">등록된 배너가 없습니다.</td></tr>
+            {slides.length === 0 && (
+              <tr><td colSpan={5} className="py-16 text-center text-gray-400">등록된 슬라이드가 없습니다.</td></tr>
             )}
           </tbody>
         </table>

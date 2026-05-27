@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { updatePost } from "../../../actions";
 import { createClient } from "@/lib/supabase/client";
 import { MediaUploadWidget } from "@/components/admin/MediaUploadWidget";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 
 const POST_TYPES = [
   "공지사항", "총동창회소식", "단위동문회소식", "모교소식",
@@ -31,6 +32,7 @@ export default function EditPostPage() {
   const [error, setError] = useState("");
   const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [attachments, setAttachments] = useState<string[]>([]);
+  const [content, setContent] = useState("");
 
   useEffect(() => {
     createClient().from("posts").select("*").eq("id", id).single().then(({ data }) => {
@@ -38,6 +40,7 @@ export default function EditPostPage() {
         setPost(data);
         setThumbnailUrl(data.image_url ?? "");
         setAttachments(data.attachments ?? []);
+        setContent(data.content ?? "");
       }
     });
   }, [id]);
@@ -49,6 +52,7 @@ export default function EditPostPage() {
     try {
       const formData = new FormData(e.currentTarget);
       formData.set("image_url", thumbnailUrl);
+      formData.set("content", content);
       attachments.forEach((url) => formData.append("attachments", url));
       await updatePost(id, formData);
       router.push("/admin?tab=posts");
@@ -99,7 +103,7 @@ export default function EditPostPage() {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">본문 *</label>
-          <textarea name="content" required rows={12} defaultValue={post.content} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#003876] resize-y" />
+          <RichTextEditor value={content} onChange={setContent} />
         </div>
 
         <div className="flex items-center gap-2">

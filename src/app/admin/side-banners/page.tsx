@@ -2,34 +2,36 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { createBanner, updateBanner, deleteBanner, toggleBanner } from "../actions";
+import { createSideBanner, updateSideBanner, deleteSideBanner, toggleSideBanner } from "../actions";
 import { createClient } from "@/lib/supabase/client";
 
-interface Banner {
+interface SideBanner {
   id: string;
-  title: string;
-  subtitle: string | null;
   image_url: string | null;
   link_url: string | null;
+  alt_text: string | null;
+  position: string;
   sort_order: number;
   is_active: boolean;
 }
 
-export default function AdminBannersPage() {
-  const [banners, setBanners] = useState<Banner[]>([]);
+export default function AdminSideBannersPage() {
+  const [banners, setBanners] = useState<SideBanner[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<Partial<Banner>>({});
+  const [editForm, setEditForm] = useState<Partial<SideBanner>>({});
 
   const imageInputRef = useRef<HTMLInputElement>(null);
-  const editImageInputRef = useRef<HTMLInputElement>(null);
   const [imageUrl, setImageUrl] = useState("");
   const [uploading, setUploading] = useState(false);
+
+  const editImageInputRef = useRef<HTMLInputElement>(null);
+  const [editImageUrl, setEditImageUrl] = useState("");
   const [editUploading, setEditUploading] = useState(false);
 
   async function loadBanners() {
-    const { data } = await createClient().from("banners").select("*").order("sort_order");
+    const { data } = await createClient().from("side_banners").select("*").order("sort_order");
     setBanners(data ?? []);
   }
 
@@ -57,7 +59,11 @@ export default function AdminBannersPage() {
     fd.append("bucket", "post-media");
     const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
     const json = await res.json();
-    if (res.ok) setEditForm((prev) => ({ ...prev, image_url: json.url }));
+    if (res.ok) {
+      const url = json.url;
+      setEditImageUrl(url);
+      setEditForm((prev) => ({ ...prev, image_url: url }));
+    }
     setEditUploading(false);
   }
 
@@ -65,8 +71,7 @@ export default function AdminBannersPage() {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.currentTarget);
-    formData.set("image_url", imageUrl);
-    await createBanner(formData);
+    await createSideBanner(formData);
     setShowForm(false);
     setImageUrl("");
     setLoading(false);
@@ -76,35 +81,37 @@ export default function AdminBannersPage() {
   async function handleUpdate(id: string) {
     setLoading(true);
     const formData = new FormData();
-    formData.append("title", editForm.title ?? "");
-    formData.append("subtitle", editForm.subtitle ?? "");
-    formData.append("image_url", editForm.image_url ?? "");
+    formData.append("image_url", editImageUrl || (editForm.image_url ?? ""));
     formData.append("link_url", editForm.link_url ?? "");
+    formData.append("alt_text", editForm.alt_text ?? "AD");
+    formData.append("position", editForm.position ?? "left");
     formData.append("sort_order", String(editForm.sort_order ?? 0));
-    await updateBanner(id, formData);
+    await updateSideBanner(id, formData);
     setEditingId(null);
+    setEditImageUrl("");
     setLoading(false);
     loadBanners();
   }
 
   async function handleDelete(id: string) {
     if (!confirm("삭제하시겠습니까?")) return;
-    await deleteBanner(id);
+    await deleteSideBanner(id);
     loadBanners();
   }
 
   async function handleToggle(id: string, current: boolean) {
-    await toggleBanner(id, !current);
+    await toggleSideBanner(id, !current);
     loadBanners();
   }
 
-  function startEdit(banner: Banner) {
+  function startEdit(banner: SideBanner) {
     setEditingId(banner.id);
+    setEditImageUrl("");
     setEditForm({
-      title: banner.title,
-      subtitle: banner.subtitle ?? "",
       image_url: banner.image_url ?? "",
       link_url: banner.link_url ?? "",
+      alt_text: banner.alt_text ?? "AD",
+      position: banner.position,
       sort_order: banner.sort_order,
     });
   }
@@ -113,10 +120,8 @@ export default function AdminBannersPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">배너 관리 (히어로)</h1>
-          <p className="text-sm text-amber-600 mt-0.5 bg-amber-50 px-2 py-1 rounded inline-block">
-            히어로 배너가 없으면 기본 이미지 3장이 자동으로 표시됩니다.
-          </p>
+          <h1 className="text-2xl font-bold text-gray-800">사이드 배너 관리</h1>
+          <p className="text-sm text-gray-400 mt-0.5">홈페이지 좌/우측 광고 배너 (1200px 이상 화면에서 표시)</p>
         </div>
         <button onClick={() => setShowForm(!showForm)} className="px-4 py-2 bg-[#003876] text-white text-sm font-semibold rounded-lg hover:bg-[#002a5c] transition-colors">
           {showForm ? "취소" : "+ 새 배너"}
@@ -125,11 +130,14 @@ export default function AdminBannersPage() {
 
       {showForm && (
         <form onSubmit={handleCreate} className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
-          <h2 className="text-base font-bold text-gray-700">새 배너 추가</h2>
+          <h2 className="text-base font-bold text-gray-700">새 사이드 배너 추가</h2>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-gray-600 mb-1.5">제목 *</label>
-              <input name="title" required placeholder="배너 제목" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#003876]" />
+              <label className="block text-xs font-semibold text-gray-600 mb-1.5">위치 *</label>
+              <select name="position" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#003876]">
+                <option value="left">왼쪽 (Left)</option>
+                <option value="right">오른쪽 (Right)</option>
+              </select>
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-600 mb-1.5">순서</label>
@@ -137,28 +145,29 @@ export default function AdminBannersPage() {
             </div>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1.5">부제목</label>
-            <input name="subtitle" placeholder="부제목 (선택)" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#003876]" />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1.5">배경 이미지</label>
+            <label className="block text-xs font-semibold text-gray-600 mb-1.5">배너 이미지 (120×200px 권장)</label>
             <div className="flex items-center gap-3">
               <button type="button" onClick={() => imageInputRef.current?.click()}
                 className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors">
                 {uploading ? "업로드 중..." : "이미지 업로드"}
               </button>
               <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-              {imageUrl && <span className="text-xs text-green-600 font-medium">✓ 업로드 완료</span>}
+              {imageUrl && <span className="text-xs text-green-600 font-medium">업로드 완료</span>}
             </div>
             {imageUrl && (
-              <div className="mt-2 relative w-40 h-20 rounded overflow-hidden border border-gray-200">
-                <Image src={imageUrl} alt="preview" fill className="object-cover" unoptimized />
+              <div className="mt-2 relative w-[60px] h-[100px] rounded overflow-hidden border border-gray-200">
+                <Image src={imageUrl} alt="preview" fill className="object-cover" />
               </div>
             )}
+            <input type="hidden" name="image_url" value={imageUrl} />
           </div>
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1.5">링크 URL</label>
-            <input name="link_url" placeholder="/news/notice 또는 https://..." className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#003876]" />
+            <input name="link_url" placeholder="https://... 또는 /business/..." className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#003876]" />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1.5">대체 텍스트 (alt)</label>
+            <input name="alt_text" defaultValue="AD" placeholder="AD" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#003876]" />
           </div>
           <button type="submit" disabled={loading} className="px-5 py-2 bg-[#003876] text-white text-sm font-semibold rounded-lg hover:bg-[#002a5c] disabled:opacity-40">
             {loading ? "저장 중..." : "저장"}
@@ -170,9 +179,10 @@ export default function AdminBannersPage() {
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
+              <th className="py-3 px-4 text-center text-gray-500 font-medium w-16">위치</th>
               <th className="py-3 px-4 text-center text-gray-500 font-medium w-12">순서</th>
-              <th className="py-3 px-4 text-left text-gray-500 font-medium hidden md:table-cell w-16">이미지</th>
-              <th className="py-3 px-4 text-left text-gray-500 font-medium">제목 / 링크</th>
+              <th className="py-3 px-4 text-left text-gray-500 font-medium hidden md:table-cell w-20">이미지</th>
+              <th className="py-3 px-4 text-left text-gray-500 font-medium">링크 / alt</th>
               <th className="py-3 px-4 text-center text-gray-500 font-medium w-20">상태</th>
               <th className="py-3 px-4 text-center text-gray-500 font-medium w-28">관리</th>
             </tr>
@@ -181,18 +191,28 @@ export default function AdminBannersPage() {
             {banners.map((banner) => (
               <>
                 <tr key={banner.id} className="hover:bg-gray-50">
+                  <td className="py-3 px-4 text-center">
+                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${banner.position === "left" ? "bg-blue-50 text-blue-600" : "bg-purple-50 text-purple-600"}`}>
+                      {banner.position === "left" ? "좌측" : "우측"}
+                    </span>
+                  </td>
                   <td className="py-3 px-4 text-center text-gray-400">{banner.sort_order}</td>
                   <td className="py-3 px-4 hidden md:table-cell">
                     {banner.image_url ? (
-                      <img src={banner.image_url} alt="" className="w-14 h-9 object-cover rounded" />
+                      <div className="relative w-[30px] h-[50px] rounded overflow-hidden border border-gray-200">
+                        <Image src={banner.image_url} alt={banner.alt_text ?? "AD"} fill className="object-cover" />
+                      </div>
                     ) : (
-                      <div className="w-14 h-9 bg-linear-to-r from-[#003876] to-[#0066CC] rounded" />
+                      <div className="w-[30px] h-[50px] bg-gray-100 rounded flex items-center justify-center text-[10px] text-gray-400">없음</div>
                     )}
                   </td>
                   <td className="py-3 px-4">
-                    <p className="font-medium text-gray-800">{banner.title}</p>
-                    {banner.subtitle && <p className="text-xs text-gray-400">{banner.subtitle}</p>}
-                    {banner.link_url && <p className="text-xs text-gray-400 mt-0.5">{banner.link_url}</p>}
+                    {banner.link_url ? (
+                      <p className="text-sm text-gray-700 truncate max-w-xs">{banner.link_url}</p>
+                    ) : (
+                      <p className="text-sm text-gray-300">링크 없음</p>
+                    )}
+                    <p className="text-xs text-gray-400 mt-0.5">{banner.alt_text}</p>
                   </td>
                   <td className="py-3 px-4 text-center">
                     <button onClick={() => handleToggle(banner.id, banner.is_active)} className={`text-xs px-3 py-1 rounded-full font-medium transition-colors ${
@@ -212,21 +232,24 @@ export default function AdminBannersPage() {
                 </tr>
                 {editingId === banner.id && (
                   <tr key={`edit-${banner.id}`} className="bg-[#F8FAFF]">
-                    <td colSpan={5} className="px-4 py-4">
+                    <td colSpan={6} className="px-4 py-4">
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         <div>
-                          <label className="block text-xs font-semibold text-gray-600 mb-1">제목</label>
-                          <input value={editForm.title ?? ""} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#003876]" />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-600 mb-1">부제목</label>
-                          <input value={editForm.subtitle ?? ""} onChange={(e) => setEditForm({ ...editForm, subtitle: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#003876]" />
+                          <label className="block text-xs font-semibold text-gray-600 mb-1">위치</label>
+                          <select value={editForm.position ?? "left"} onChange={(e) => setEditForm({ ...editForm, position: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#003876]">
+                            <option value="left">왼쪽</option>
+                            <option value="right">오른쪽</option>
+                          </select>
                         </div>
                         <div>
                           <label className="block text-xs font-semibold text-gray-600 mb-1">링크 URL</label>
                           <input value={editForm.link_url ?? ""} onChange={(e) => setEditForm({ ...editForm, link_url: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#003876]" />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-600 mb-1">대체 텍스트</label>
+                          <input value={editForm.alt_text ?? ""} onChange={(e) => setEditForm({ ...editForm, alt_text: e.target.value })}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#003876]" />
                         </div>
                         <div>
@@ -235,25 +258,21 @@ export default function AdminBannersPage() {
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#003876]" />
                         </div>
                       </div>
-
-                      {/* 이미지 업로드 */}
                       <div className="mt-3">
-                        <label className="block text-xs font-semibold text-gray-600 mb-1.5">배경 이미지</label>
+                        <label className="block text-xs font-semibold text-gray-600 mb-1">이미지 교체</label>
                         <div className="flex items-center gap-3">
                           <button type="button" onClick={() => editImageInputRef.current?.click()}
                             className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors">
                             {editUploading ? "업로드 중..." : "이미지 업로드"}
                           </button>
                           <input ref={editImageInputRef} type="file" accept="image/*" className="hidden" onChange={handleEditImageUpload} />
-                          {editForm.image_url && (
-                            <div className="relative w-24 h-14 rounded overflow-hidden border border-gray-200">
-                              <img src={editForm.image_url} alt="preview" className="w-full h-full object-cover" />
+                          {(editImageUrl || editForm.image_url) && (
+                            <div className="relative w-[30px] h-[50px] rounded overflow-hidden border border-gray-200">
+                              <Image src={editImageUrl || editForm.image_url!} alt="preview" fill className="object-cover" />
                             </div>
                           )}
-                          {editForm.image_url && <span className="text-xs text-green-600">✓ 이미지 있음</span>}
                         </div>
                       </div>
-
                       <button onClick={() => handleUpdate(banner.id)} disabled={loading}
                         className="mt-3 px-5 py-2 bg-[#003876] text-white text-sm font-semibold rounded-lg hover:bg-[#002a5c] disabled:opacity-40">
                         {loading ? "저장 중..." : "수정 저장"}
@@ -264,7 +283,7 @@ export default function AdminBannersPage() {
               </>
             ))}
             {banners.length === 0 && (
-              <tr><td colSpan={5} className="py-16 text-center text-gray-400">등록된 배너가 없습니다.</td></tr>
+              <tr><td colSpan={6} className="py-16 text-center text-gray-400">등록된 사이드 배너가 없습니다.</td></tr>
             )}
           </tbody>
         </table>

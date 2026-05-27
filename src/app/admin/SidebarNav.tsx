@@ -13,6 +13,8 @@ const navItems = [
   { label: "업체 관리", tab: "businesses", icon: "🏢" },
   { label: "기부 내역", tab: "donations", icon: "💰" },
   { label: "배너 관리", tab: "banners", icon: "🖼️" },
+  { label: "슬라이드 광고", tab: "ad_slides", icon: "📺" },
+  { label: "사이드 배너", tab: "side_banners", icon: "📌" },
   { label: "갤러리 관리", tab: "gallery", icon: "📷" },
   { label: "동창회보 관리", tab: "newsletter", icon: "📰" },
   { label: "문자 발송", tab: "sms", icon: "📱" },

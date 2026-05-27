@@ -8,12 +8,14 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           <div>
             <div className="flex items-center gap-3 mb-4">
+              <div className="w-[54px] h-[54px] rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden">
               <Image
-                src="/images/inha-emblem-white.png"
-                alt="인하대학교 엠블럼"
-                width={44}
-                height={44}
+                src="/images/inha-emblem.png"
+                alt="인하대학교 총동창회"
+                width={50}
+                height={50}
               />
+            </div>
               <div>
                 <div className="text-white font-bold text-sm">인하대학교 총동창회</div>
                 <div className="text-[#C8A951] text-xs">INHA UNIVERSITY</div>

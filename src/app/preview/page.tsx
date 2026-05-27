@@ -1,469 +1,508 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { GNB } from "@/components/layout/GNB";
+import { Footer } from "@/components/layout/Footer";
+import { HeroBanner } from "@/components/home/HeroBanner";
+import { AdSlider } from "@/components/home/AdSlider";
 
-/* ------------------------------------------------------------------ */
-/* Theme definitions                                                   */
-/* ------------------------------------------------------------------ */
-
-interface Theme {
-  name: string;
-  navy: string;
-  navyHover: string;
-  gold: string;
-  goldText: string;
-  goldHover: string;
-  blue: string;
-  dark: string;
-}
-
-const themes: Theme[] = [
-  { name: "인하 기본", navy: "#003876", navyHover: "#002a5c", gold: "#C8A951", goldText: "#7a5f1a", goldHover: "#d4b96a", blue: "#0066CC", dark: "#1A1A2E" },
-  { name: "미드나잇 네이비", navy: "#0A2342", navyHover: "#071929", gold: "#C8A951", goldText: "#7a5f1a", goldHover: "#d4b96a", blue: "#1565C0", dark: "#071929" },
-  { name: "인디고 + 골드", navy: "#1A237E", navyHover: "#121760", gold: "#D4AF37", goldText: "#8B7000", goldHover: "#e0c04a", blue: "#283593", dark: "#0D0D3E" },
-  { name: "딥 블루", navy: "#0D47A1", navyHover: "#09337a", gold: "#C8A951", goldText: "#7a5f1a", goldHover: "#d4b96a", blue: "#1565C0", dark: "#071929" },
-  { name: "오션 블루", navy: "#0277BD", navyHover: "#015c90", gold: "#C8A951", goldText: "#7a5f1a", goldHover: "#d4b96a", blue: "#0288D1", dark: "#01338c" },
-  { name: "스틸 블루", navy: "#01579B", navyHover: "#014175", gold: "#C8A951", goldText: "#7a5f1a", goldHover: "#d4b96a", blue: "#0277BD", dark: "#012f60" },
-  { name: "다크 틸", navy: "#0C3547", navyHover: "#081f2b", gold: "#C8A951", goldText: "#7a5f1a", goldHover: "#d4b96a", blue: "#0E5073", dark: "#061520" },
-  { name: "챠콜 네이비", navy: "#1C2938", navyHover: "#111b25", gold: "#C8A951", goldText: "#7a5f1a", goldHover: "#d4b96a", blue: "#2C4A6E", dark: "#0D1117" },
+/* ── QuickMenu items ── */
+const QUICK_ITEMS = [
+  { label: "동문 검색", href: "/network/search", icon: "🔍" },
+  { label: "회원 우대 서비스", href: "/business", icon: "🎁" },
+  { label: "후원금 기부", href: "/donate", icon: "❤️" },
+  { label: "올해 행사", href: "/news/events", icon: "📅" },
+  { label: "공지사항", href: "/news/notice", icon: "📢" },
 ];
 
-/* ------------------------------------------------------------------ */
-/* Demo banner data                                                    */
-/* ------------------------------------------------------------------ */
+/* ── Types & mock data ── */
+type PostType = "총동창회소식" | "공지사항" | "단위동문회소식" | "동문동정" | "모교소식" | "인터뷰/칼럼";
 
-const SIDE_BANNERS_LEFT = [
-  { label: "인하사랑카드", sub: "동문 혜택 카드", color: "#003876" },
-  { label: "인하플레이스", sub: "동문 업소 찾기", color: "#0066CC" },
-  { label: "동문장학회", sub: "장학금 신청", color: "#1A1A2E" },
-  { label: "모교후원", sub: "발전기금 기부", color: "#2C4A6E" },
+interface MockPost {
+  id: string;
+  type: PostType;
+  title: string;
+  summary?: string;
+  image_url: string | null;
+  created_at: string;
+  is_pinned: boolean;
+}
+
+const MOCK_POSTS: MockPost[] = [
+  { id: "1", type: "총동창회소식", title: "제33대 김종우 총동창회장 취임", summary: "김종우(전자84) 회장 취임식이 인천 라마다송도호텔에서 개최", image_url: null, created_at: "2026-01-27T00:00:00Z", is_pinned: false },
+  { id: "2", type: "총동창회소식", title: "2025 인하가족의 밤 개최", summary: "인천 송도컨벤시아에서 인하 가족의 밤 행사 개최", image_url: null, created_at: "2025-12-04T00:00:00Z", is_pinned: false },
+  { id: "3", type: "총동창회소식", title: "2025 총동창회장배 골프대회", summary: "경기도 덕평 H1클럽에서 40팀 160명 참가", image_url: null, created_at: "2025-05-26T00:00:00Z", is_pinned: false },
+  { id: "4", type: "총동창회소식", title: "비룡제 격려 방문", summary: "인하대 축제 비룡제에 총동창회장 격려 방문", image_url: null, created_at: "2025-05-16T00:00:00Z", is_pinned: false },
+  { id: "5", type: "공지사항", title: "[공지] 2026년도 회비 납부 안내", image_url: null, created_at: "2026-05-20T00:00:00Z", is_pinned: true },
+  { id: "6", type: "공지사항", title: "동문회관 건립기금 모금 현황", image_url: null, created_at: "2026-05-15T00:00:00Z", is_pinned: false },
+  { id: "7", type: "공지사항", title: "제33대 회장 취임 인사말", image_url: null, created_at: "2026-01-27T00:00:00Z", is_pinned: false },
+  { id: "8", type: "공지사항", title: "2025 인하가족의 밤 결과 보고", image_url: null, created_at: "2025-12-05T00:00:00Z", is_pinned: false },
+  { id: "9", type: "단위동문회소식", title: "인맥회(기계과) 회장 이취임식", summary: "박성구(81) 신임회장 취임", image_url: null, created_at: "2025-03-07T00:00:00Z", is_pinned: false },
+  { id: "10", type: "단위동문회소식", title: "ROTC동문회 현충원 참배", summary: "순직 동문 5명 묘소 참배, 78명 참석", image_url: null, created_at: "2025-06-01T00:00:00Z", is_pinned: false },
+  { id: "11", type: "동문동정", title: "120ROTC산악회 안나푸르나 트래킹", summary: "베이스캠프 트래킹 완료", image_url: null, created_at: "2025-10-15T00:00:00Z", is_pinned: false },
+  { id: "12", type: "동문동정", title: "동문 CEO 포럼 2026 봄 정기모임", summary: "강남 스타리움에서 동문 CEO 30여명 참석", image_url: null, created_at: "2026-04-22T00:00:00Z", is_pinned: false },
+  { id: "13", type: "모교소식", title: "인하대 생명과학과 설립 50주년 기념식", summary: "50주년 기념 심포지엄 및 학술대회 성료", image_url: null, created_at: "2025-09-01T00:00:00Z", is_pinned: false },
+  { id: "14", type: "모교소식", title: "2026 인하대학교 입학식 거행", summary: "신입생 3,200여명 인하의 일원으로", image_url: null, created_at: "2026-03-02T00:00:00Z", is_pinned: false },
+  { id: "15", type: "인터뷰/칼럼", title: "[칼럼] 동문 네트워크의 가치", summary: "대학 동문 조직이 사회적 자본으로서 갖는 의미", image_url: null, created_at: "2026-05-10T00:00:00Z", is_pinned: false },
+  { id: "16", type: "인터뷰/칼럼", title: "[인터뷰] 김종우 회장에게 듣는 인하의 미래", summary: "제33대 회장 취임 인터뷰", image_url: null, created_at: "2026-02-01T00:00:00Z", is_pinned: false },
+];
+
+const MOCK_CONDOLENCES = [
+  { id: "1", name: "김○○ 동문", type: "경사", content: "득남", event_date: "2026-05-10" },
+  { id: "2", name: "이○○ 동문 부친", type: "부고", content: "별세", event_date: "2026-05-08" },
+  { id: "3", name: "박○○ 동문", type: "경사", content: "자녀 결혼", event_date: "2026-05-04" },
+  { id: "4", name: "최○○ 동문", type: "경사", content: "교수 임용", event_date: "2026-05-01" },
+  { id: "5", name: "정○○ 동문 모친", type: "부고", content: "별세", event_date: "2026-04-28" },
+];
+
+const MOCK_AD_SLIDES = [
+  { id: "s1", title: "인하사랑카드 혜택 안내", label: "금융", image_url: null, link_url: "/business/card" },
+  { id: "s2", title: "동문 창업 지원 프로그램", label: "창업", image_url: null, link_url: "/business/startup" },
+  { id: "s3", title: "인하상회 동문 특별 할인", label: "쇼핑", image_url: null, link_url: "/business/shop" },
 ];
 
 const SIDE_BANNERS_RIGHT = [
-  { label: "인하상회", sub: "동문 전용 쇼핑", color: "#C8A951", textColor: "#7a5f1a" },
-  { label: "창업지원", sub: "동문 네트워크", color: "#1B4332", textColor: "#fff" },
-  { label: "골프대회", sub: "총동창회장배", color: "#6B1E3A", textColor: "#fff" },
-  { label: "동문콘서트", sub: "인하사랑콘서트", color: "#4A0E8F", textColor: "#fff" },
+  { label: "인하상회", sub: "동문 전용 쇼핑", href: "/business/shop" },
+  { label: "창업지원", sub: "동문 네트워크", href: "/business/startup" },
+  { label: "총동창회장배", sub: "골프대회", href: "/news/events" },
+  { label: "인하사랑콘서트", sub: "문화 공연 티켓", href: "/business/concert" },
 ];
 
-const CARD_NEWS = [
-  { label: "제33대 총동창회장 취임", tag: "NEWS", color: "#003876" },
-  { label: "2026 장학증서 수여식", tag: "EVENT", color: "#0066CC" },
-  { label: "인하상회 정식 오픈", tag: "BIZ", color: "#C8A951", textColor: "#7a5f1a" },
-  { label: "ROTC동문회 참배 행사", tag: "NEWS", color: "#1A1A2E" },
-  { label: "동문 골프 대회 신청", tag: "EVENT", color: "#1B4332" },
-  { label: "동문회관 건립기금", tag: "FUND", color: "#6B1E3A" },
+/* 동문기업: 이름 + 동문 정보 */
+const PARTNER_COMPANIES = [
+  { name: "인하로지스틱스", person: "김○○ (기계과 85)", initial: "인" },
+  { name: "(주)비젼테크", person: "이○○ (전자과 90)", initial: "비" },
+  { name: "인하메디컬", person: "박○○ (의학과 95)", initial: "의" },
+  { name: "스마트솔루션즈", person: "최○○ (경영학과 00)", initial: "스" },
+  { name: "KH법무법인", person: "정○○ (법학과 88)", initial: "법" },
+  { name: "(주)한빛건설", person: "강○○ (건축과 92)", initial: "한" },
+  { name: "인하식품", person: "조○○ (식품과 87)", initial: "식" },
+  { name: "알파테크", person: "윤○○ (컴퓨터 03)", initial: "알" },
 ];
 
-/* ------------------------------------------------------------------ */
-/* Color Switcher                                                      */
-/* ------------------------------------------------------------------ */
+const CARD_NEWS_ITEMS = [
+  { title: "제33대 총동창회장 취임", tag: "NEWS", color: "#003876" },
+  { title: "2026 장학증서 수여식", tag: "EVENT", color: "#1A6B4A" },
+  { title: "인하상회 정식 오픈", tag: "BIZ", color: "#0066CC" },
+  { title: "ROTC동문회 참배 행사", tag: "NEWS", color: "#1A1A2E" },
+];
 
-function ColorSwitcher({ active, onSelect }: { active: number; onSelect: (i: number) => void }) {
+const bizItems = [
+  { label: "인하상회", desc: "동문 전용 쇼핑몰", href: "/business/shop", bg: "bg-[#1A6B4A]" },
+  { label: "인하사랑카드", desc: "카드 신청 및 혜택", href: "/business/card", bg: "bg-[#003876]" },
+  { label: "인하플레이스", desc: "동문 업소 찾기", href: "/business/place", bg: "bg-[#0066CC]" },
+  { label: "인하사랑콘서트", desc: "문화 공연 티켓", href: "/business/concert", bg: "bg-[#1A1A2E]" },
+  { label: "창업지원", desc: "동문 창업 네트워크", href: "/business/startup", bg: "bg-[#555]" },
+];
+
+/* ── Helpers ── */
+const formatDate = (d: string) =>
+  new Date(d).toLocaleDateString("ko-KR", { month: "2-digit", day: "2-digit" });
+
+const formatDateFull = (d: string) => {
+  const dt = new Date(d);
+  return `${dt.getFullYear()}.${String(dt.getMonth() + 1).padStart(2, "0")}.${String(dt.getDate()).padStart(2, "0")}`;
+};
+
+const TYPE_LABEL: Record<string, string> = {
+  "총동창회소식": "본회소식",
+  "모교소식": "모교소식",
+  "동문동정": "인하동정",
+  "인터뷰/칼럼": "오피니언",
+  "공지사항": "공지",
+  "단위동문회소식": "단위동문회",
+};
+
+const TYPE_BADGE: Record<string, string> = {
+  "총동창회소식": "bg-[#003876] text-white",
+  "모교소식": "bg-[#1A6B4A] text-white",
+  "동문동정": "bg-[#0277BD] text-white",
+  "인터뷰/칼럼": "bg-gray-700 text-white",
+  "공지사항": "bg-[#C8A951] text-[#003876]",
+  "단위동문회소식": "bg-gray-200 text-gray-600",
+};
+
+const TYPE_TEXT_COLOR: Record<string, string> = {
+  "총동창회소식": "text-[#003876]",
+  "모교소식": "text-[#1A6B4A]",
+  "동문동정": "text-[#0277BD]",
+  "인터뷰/칼럼": "text-gray-600",
+  "공지사항": "text-[#C8A951]",
+  "단위동문회소식": "text-gray-500",
+};
+
+const FEATURED_GRAD: Record<string, string> = {
+  "총동창회소식": "from-[#003876] to-[#0066CC]",
+  "모교소식": "from-[#1A6B4A] to-[#003876]",
+  "동문동정": "from-[#0277BD] to-[#003876]",
+  "인터뷰/칼럼": "from-[#1A1A2E] to-[#003876]",
+};
+
+/* ── BizSection ── */
+function BizSection() {
   return (
-    <div className="fixed top-4 right-4 z-50 bg-white border border-gray-200 rounded-2xl shadow-xl p-4 w-52">
-      <p className="text-xs font-bold text-gray-600 mb-3 tracking-wide uppercase">컬러 시안</p>
-      <div className="space-y-1">
-        {themes.map((t, i) => (
-          <button
-            key={i}
-            onClick={() => onSelect(i)}
-            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-all ${
-              active === i ? "bg-gray-100 ring-1 ring-gray-300" : "hover:bg-gray-50"
-            }`}
-          >
-            <span className="w-5 h-5 rounded-full shrink-0 border border-white shadow-sm"
-              style={{ background: `linear-gradient(135deg, ${t.navy} 50%, ${t.gold} 50%)` }} />
-            <span className="text-xs text-gray-700 leading-tight">{t.name}</span>
-          </button>
-        ))}
-      </div>
-      <div className="mt-3 pt-3 border-t border-gray-100 text-center text-[10px] text-gray-400">
-        컨펌 후 실제 적용
-      </div>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* GNB                                                                 */
-/* ------------------------------------------------------------------ */
-
-function PreviewGNB({ t }: { t: Theme }) {
-  return (
-    <header className="h-16 border-b border-gray-100 bg-white flex items-center sticky top-0 z-40">
-      <div className="max-w-[1400px] mx-auto w-full flex items-center justify-between px-4">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-black"
-            style={{ background: t.navy }}>仁</div>
-          <div>
-            <div className="text-sm font-bold text-gray-800">인하대학교 총동창회</div>
-            <div className="text-[10px] font-semibold" style={{ color: t.gold }}>INHA UNIVERSITY</div>
-          </div>
+    <section className="bg-white py-8 md:py-10 border-b border-gray-100">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-base md:text-lg font-bold text-gray-800">총동창회 주요 사업</h2>
+          <Link href="/business" className="text-sm text-gray-400 hover:text-[#003876] transition-colors">
+            전체보기 +
+          </Link>
         </div>
-        <nav className="hidden md:flex items-center gap-5 text-sm text-gray-600">
-          {["총동창회", "소식", "사업", "커뮤니티", "네트워크", "장학회", "모교소식", "기부"].map((m) => (
-            <span key={m} className="hover:text-gray-900 cursor-pointer">{m}</span>
-          ))}
-        </nav>
-        <button className="text-xs px-3 py-1.5 rounded-full font-medium text-white"
-          style={{ background: t.navy }}>로그인</button>
-      </div>
-    </header>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* Hero (full screen)                                                  */
-/* ------------------------------------------------------------------ */
-
-function PreviewHero({ t }: { t: Theme }) {
-  return (
-    <div className="h-[calc(100vh-64px)] flex items-center justify-center relative overflow-hidden"
-      style={{ background: `linear-gradient(135deg, ${t.dark} 0%, ${t.navy} 60%, ${t.blue} 100%)` }}>
-      <div className="text-center text-white z-10">
-        <div className="text-xs font-semibold tracking-widest mb-3 uppercase" style={{ color: t.gold }}>
-          Inha University Alumni Association
-        </div>
-        <h1 className="text-4xl font-black mb-3">인하대학교 총동창회</h1>
-        <p className="text-white/70 text-base mb-8">친목공영 | 모교후원 | 후진육영</p>
-        <div className="flex gap-3 justify-center">
-          <button className="px-6 py-3 rounded-full text-sm font-bold shadow"
-            style={{ background: t.gold, color: t.goldText }}>자세히 보기</button>
-          <button className="px-6 py-3 rounded-full text-sm font-semibold border border-white/40 text-white hover:border-white transition-colors">
-            회비 납부
-          </button>
-        </div>
-      </div>
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
-        {[0,1,2].map(i => <div key={i} className={`h-1.5 rounded-full ${i===0?"w-6 bg-white":"w-2 bg-white/40"}`} />)}
-      </div>
-      <div className="absolute inset-0 opacity-5 flex items-end justify-end p-8 select-none">
-        <span className="text-[180px] font-black text-white leading-none">仁</span>
-      </div>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* QuickMenu strip                                                     */
-/* ------------------------------------------------------------------ */
-
-function PreviewQuickMenu({ t }: { t: Theme }) {
-  const menus = [
-    { label: "인하상회", icon: "🏪" }, { label: "인하사랑카드", icon: "💳" },
-    { label: "인하플레이스", icon: "📍" }, { label: "동문 검색", icon: "🔍" },
-    { label: "기부하기", icon: "❤️" },
-  ];
-  return (
-    <div style={{ background: t.navy }}>
-      <div className="max-w-[1400px] mx-auto px-4">
-        <div className="grid grid-cols-5 divide-x divide-white/15">
-          {menus.map((m) => (
-            <div key={m.label}
-              className="flex flex-col items-center gap-2 py-6 cursor-pointer transition-all hover:brightness-90"
-              style={{ borderColor: "rgba(255,255,255,0.15)" }}>
-              <span className="text-2xl">{m.icon}</span>
-              <span className="text-white text-xs font-medium">{m.label}</span>
-            </div>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
+          {bizItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`${item.bg} rounded-lg p-4 md:p-6 flex flex-col gap-1.5 md:gap-2 hover:opacity-90 transition-opacity`}
+            >
+              <span className="text-white font-bold text-sm md:text-base">{item.label}</span>
+              <span className="text-white/70 text-xs">{item.desc}</span>
+            </Link>
           ))}
         </div>
       </div>
-    </div>
+    </section>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* Side Banner (single item)                                           */
-/* ------------------------------------------------------------------ */
-
-function SideBanner({ label, sub, color, textColor = "#fff" }: {
-  label: string; sub: string; color: string; textColor?: string;
-}) {
-  return (
-    <div className="w-[120px] h-[200px] rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity flex flex-col items-center justify-center text-center p-3 gap-1.5"
-      style={{ background: color }}>
-      <span className="text-2xl">🏫</span>
-      <span className="text-xs font-bold leading-tight" style={{ color: textColor }}>{label}</span>
-      <span className="text-[10px] leading-tight opacity-80" style={{ color: textColor }}>{sub}</span>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* Layout with side banners                                            */
-/* ------------------------------------------------------------------ */
-
-function WithSideBanners({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="max-w-[1400px] mx-auto px-4">
-      <div className="flex gap-4">
-        {/* Left side banners */}
-        <aside className="hidden xl:flex flex-col gap-3 pt-6 shrink-0">
-          {SIDE_BANNERS_LEFT.map((b, i) => (
-            <SideBanner key={i} {...b} />
-          ))}
-        </aside>
-
-        {/* Main content */}
-        <div className="flex-1 min-w-0">
-          {children}
-        </div>
-
-        {/* Right side banners */}
-        <aside className="hidden xl:flex flex-col gap-3 pt-6 shrink-0">
-          {SIDE_BANNERS_RIGHT.map((b, i) => (
-            <SideBanner key={i} {...b} />
-          ))}
-        </aside>
-      </div>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* BizSection                                                          */
-/* ------------------------------------------------------------------ */
-
-function PreviewBizSection({ t }: { t: Theme }) {
-  const items = [
-    { label: "인하사랑카드", desc: "카드 신청 및 혜택", bg: t.navy },
-    { label: "인하플레이스", desc: "동문 업소 찾기", bg: t.blue },
-    { label: "인하사랑콘서트", desc: "문화 공연 티켓", bg: t.dark },
-    { label: "창업지원", desc: "동문 창업 네트워크", bg: "#6B7280" },
-  ];
-  return (
-    <div className="bg-white py-8 border-b border-gray-100">
-      <div className="flex items-center justify-between mb-5">
-        <h2 className="text-base font-bold text-gray-800">총동창회 주요 사업</h2>
-        <span className="text-sm text-gray-400 cursor-pointer">전체보기 +</span>
-      </div>
-      <div className="grid grid-cols-4 gap-3">
-        {items.map((item) => (
-          <div key={item.label} className="rounded-lg p-5 flex flex-col gap-2 cursor-pointer hover:opacity-90 transition-opacity"
-            style={{ background: item.bg }}>
-            <span className="text-white font-bold text-sm">{item.label}</span>
-            <span className="text-white/70 text-xs">{item.desc}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* News section (simplified)                                           */
-/* ------------------------------------------------------------------ */
-
-function PreviewNewsSection({ t }: { t: Theme }) {
-  const news = [
-    "제33대 김종우 총동창회장 취임식 개최",
-    "2026 총동창회장배 골프대회 안내",
-    "인하대학교 개교 72주년 기념행사",
-    "동문 장학증서 수여식 개최 안내",
-  ];
-  const notices = [
-    { title: "[공지] 2026년도 회비 납부 안내", date: "05.20" },
-    { title: "동문회관 건립기금 모금 현황", date: "05.15" },
-    { title: "제33대 회장 취임 인사말", date: "01.27" },
-    { title: "2025 인하가족의 밤 결과 보고", date: "12.05" },
-    { title: "총동창회 정기 이사회 개최", date: "11.20" },
-  ];
-  return (
-    <div className="py-10 bg-gray-50">
-      <div className="space-y-6">
-        <div>
-          <div className="flex items-center justify-between border-b-2 pb-3 mb-4" style={{ borderColor: t.navy }}>
-            <h3 className="text-[15px] font-bold text-gray-800">총동창회 소식</h3>
-            <span className="text-xs text-gray-400 cursor-pointer">더보기 +</span>
-          </div>
-          <div className="grid grid-cols-4 gap-4">
-            {news.map((title, i) => (
-              <div key={i} className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-md transition-shadow cursor-pointer">
-                <div className="h-32 flex items-center justify-center"
-                  style={{ background: `linear-gradient(135deg, ${t.navy}, ${t.blue})` }}>
-                  <span className="text-white/15 text-3xl font-black">INHA</span>
-                </div>
-                <div className="p-3">
-                  <p className="text-xs font-semibold text-gray-700 leading-snug line-clamp-2">{title}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-white rounded border border-gray-200 p-6">
-          <div className="flex items-center justify-between border-b-2 pb-3 mb-1" style={{ borderColor: t.navy }}>
-            <h3 className="text-[15px] font-bold text-gray-800">공지사항</h3>
-            <span className="text-xs text-gray-400 cursor-pointer">더보기 +</span>
-          </div>
-          <ul className="divide-y divide-gray-100">
-            {notices.map((n, i) => (
-              <li key={i} className="flex items-center justify-between py-2.5 hover:bg-gray-50 px-2 -mx-2 rounded cursor-pointer">
-                {i === 0 && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded mr-2 font-medium text-white shrink-0"
-                    style={{ background: t.navy }}>공지</span>
-                )}
-                <span className="text-sm text-gray-600 truncate flex-1">{n.title}</span>
-                <span className="text-xs text-gray-400 shrink-0 ml-3">{n.date}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* Donation                                                            */
-/* ------------------------------------------------------------------ */
-
-function PreviewDonation({ t }: { t: Theme }) {
+/* ── DonationDashboard ── */
+function DonationDashboard() {
   const funds = [
     { label: "회비발전기금", current: 68 },
     { label: "장학기금", current: 45 },
     { label: "동문회관 건립기금", current: 23 },
   ];
   return (
-    <div className="py-12" style={{ background: t.navy }}>
-      <div className="grid grid-cols-2 gap-10 items-center">
+    <section className="bg-[#003876] py-12 md:py-16">
+      <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
         <div>
-          <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: t.gold }}>
-            Donate &amp; Membership
-          </p>
-          <h2 className="text-white text-2xl font-bold mb-2">동문 여러분의 참여가<br />인하의 미래를 만듭니다</h2>
+          <p className="text-[#C8A951] text-xs font-semibold tracking-widest uppercase mb-2">Donate &amp; Membership</p>
+          <h2 className="text-white text-2xl md:text-3xl font-bold mb-2">
+            동문 여러분의 참여가<br />인하의 미래를 만듭니다
+          </h2>
           <p className="text-white/60 text-sm mb-6">회비발전기금 · 장학기금 · 동문회관 건립기금</p>
           <div className="flex gap-3">
-            <button className="px-6 py-3 rounded-full text-sm font-bold"
-              style={{ background: t.gold, color: t.goldText }}>기부하기</button>
-            <button className="px-6 py-3 border border-white/30 text-white text-sm font-semibold rounded-full">회비 납부</button>
+            <Link href="/donate" className="px-6 py-3 bg-[#C8A951] text-[#003876] font-bold rounded-full text-sm hover:bg-[#d4b96a] transition-colors">
+              기부하기
+            </Link>
+            <Link href="/donate/membership" className="px-6 py-3 border border-white/30 text-white text-sm font-semibold rounded-full hover:border-white transition-colors">
+              회비 납부
+            </Link>
           </div>
         </div>
         <div className="space-y-4">
-          {funds.map((f) => (
-            <div key={f.label}>
+          {funds.map((fund) => (
+            <div key={fund.label}>
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-white/80 text-sm">{f.label}</span>
-                <span className="text-sm font-bold" style={{ color: t.gold }}>{f.current}%</span>
+                <span className="text-white/80 text-sm font-medium">{fund.label}</span>
+                <span className="text-[#C8A951] text-sm font-bold">{fund.current}%</span>
               </div>
-              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.1)" }}>
-                <div className="h-full rounded-full" style={{ width: `${f.current}%`, background: t.gold }} />
+              <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                <div className="h-full bg-[#C8A951] rounded-full" style={{ width: `${fund.current}%` }} />
               </div>
             </div>
           ))}
         </div>
       </div>
-    </div>
+    </section>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* Card News Banner strip                                              */
-/* ------------------------------------------------------------------ */
-
-function CardNewsBannerStrip({ t }: { t: Theme }) {
+/* ── SideBannerItem ── */
+function SideBannerItem({ label, sub, href }: { label: string; sub: string; href: string }) {
   return (
-    <div className="bg-white py-8 border-t border-gray-100">
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-sm font-bold text-gray-700">카드뉴스 / 배너 광고</h3>
-        <span className="text-xs text-gray-400">* 광고 배너 영역 (실제 운영 시 입점 업체 배너로 교체)</span>
+    <a
+      href={href}
+      className="relative w-[120px] h-[200px] rounded-lg cursor-pointer hover:opacity-90 transition-opacity flex flex-col items-center justify-center text-center p-3 gap-1.5 bg-white border-2 border-[#003876]"
+    >
+      <span className="text-2xl">🏫</span>
+      <span className="text-xs font-bold text-[#003876] leading-tight">{label}</span>
+      <span className="text-[10px] text-gray-500 leading-tight">{sub}</span>
+      <span className="absolute bottom-1 right-1 text-[9px] bg-[#003876] text-white px-1 rounded">AD</span>
+    </a>
+  );
+}
+
+/* ── PostList ── */
+function PostList({ posts }: { posts: MockPost[] }) {
+  if (posts.length === 0)
+    return <p className="py-6 text-center text-sm text-gray-300">등록된 글이 없습니다.</p>;
+  return (
+    <ul className="divide-y divide-gray-100">
+      {posts.slice(0, 6).map((post) => (
+        <li key={post.id}>
+          <Link
+            href={`/news/${post.id}`}
+            className="flex items-center justify-between py-2.5 gap-3 group hover:bg-gray-50 px-2 -mx-2 transition-colors rounded"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              {post.is_pinned && (
+                <span className="shrink-0 text-[10px] bg-[#003876] text-white px-1.5 py-0.5 rounded">공지</span>
+              )}
+              <span className="text-sm text-gray-600 group-hover:text-[#003876] transition-colors truncate">
+                {post.title}
+              </span>
+            </div>
+            <span className="shrink-0 text-xs text-gray-400">{formatDate(post.created_at)}</span>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/* ── 주요소식 탭 섹션 (한국외대 스타일 4열 카드) ── */
+const NEWS_TABS = [
+  { label: "전체", types: ["총동창회소식", "모교소식", "동문동정", "인터뷰/칼럼"] },
+  { label: "본회소식", types: ["총동창회소식"] },
+  { label: "모교소식", types: ["모교소식"] },
+  { label: "인하동정", types: ["동문동정"] },
+  { label: "인터뷰", types: ["인터뷰/칼럼"] },
+  { label: "오피니언", types: ["인터뷰/칼럼"] },
+];
+
+function TabNewsSection() {
+  const [activeTab, setActiveTab] = useState(0);
+  const tabTypes = NEWS_TABS[activeTab].types;
+  const filtered = MOCK_POSTS.filter((p) => tabTypes.includes(p.type)).slice(0, 8);
+
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 p-6">
+      {/* 헤더 */}
+      <div className="flex items-start justify-between mb-0">
+        <h3 className="text-lg font-bold text-gray-900">주요 소식</h3>
+        <Link href="/news" className="text-sm text-gray-400 hover:text-[#003876] transition-colors mt-0.5">
+          더보기 +
+        </Link>
       </div>
-      <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
-        {CARD_NEWS.map((item, i) => (
-          <div key={i}
-            className="rounded-xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity aspect-[4/3] flex flex-col items-center justify-center text-center p-4 gap-2"
-            style={{ background: item.color }}>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20"
-              style={{ color: item.textColor ?? "#fff" }}>{item.tag}</span>
-            <span className="text-xs font-semibold leading-tight"
-              style={{ color: item.textColor ?? "#fff" }}>{item.label}</span>
-          </div>
+
+      {/* 언더라인 탭 */}
+      <div className="flex border-b border-gray-200 mt-3 mb-6">
+        {NEWS_TABS.map((t, i) => (
+          <button
+            key={i}
+            onClick={() => setActiveTab(i)}
+            className={`px-4 py-2.5 text-sm font-medium transition-colors whitespace-nowrap ${
+              activeTab === i
+                ? "text-[#003876] border-b-2 border-[#003876] -mb-px"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            {t.label}
+          </button>
         ))}
       </div>
+
+      {/* 4열 카드 그리드 */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {filtered.map((post) => (
+          <Link key={post.id} href={`/news/${post.id}`} className="group">
+            <div className="bg-white rounded-lg overflow-hidden border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all">
+              {/* 이미지 영역 */}
+              <div className="relative h-40 overflow-hidden">
+                <div
+                  className={`absolute inset-0 bg-gradient-to-br ${FEATURED_GRAD[post.type] ?? "from-[#003876] to-[#0066CC]"} flex items-center justify-center`}
+                >
+                  <span className="text-white/10 text-5xl font-black select-none">INHA</span>
+                </div>
+                {/* 카테고리 뱃지 (좌상단) */}
+                <div className="absolute top-2 left-2 z-10">
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${TYPE_BADGE[post.type] ?? "bg-gray-200 text-gray-700"}`}>
+                    {TYPE_LABEL[post.type]}
+                  </span>
+                </div>
+              </div>
+              {/* 콘텐츠 */}
+              <div className="p-3">
+                <p className="text-sm font-semibold text-gray-800 group-hover:text-[#003876] transition-colors line-clamp-2 mb-2.5 leading-snug min-h-[2.5rem]">
+                  {post.title}
+                </p>
+                <div className="flex items-center justify-between">
+                  <span className={`text-[11px] font-semibold ${TYPE_TEXT_COLOR[post.type] ?? "text-gray-500"}`}>
+                    {TYPE_LABEL[post.type]}
+                  </span>
+                  <span className="text-[11px] text-gray-400 tabular-nums">
+                    {formatDateFull(post.created_at)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Link>
+        ))}
+        {filtered.length === 0 && (
+          <div className="col-span-4 py-12 text-center text-sm text-gray-300">해당 소식이 없습니다.</div>
+        )}
+      </div>
     </div>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* Footer                                                              */
-/* ------------------------------------------------------------------ */
-
-function PreviewFooter({ t }: { t: Theme }) {
+/* ── 단위동문회소식 + 동문동정 ── */
+function LocalAlumniSection() {
+  const localNews = MOCK_POSTS.filter((p) => p.type === "단위동문회소식");
+  const alumniNews = MOCK_POSTS.filter((p) => p.type === "동문동정");
   return (
-    <footer className="py-10" style={{ background: t.dark }}>
-      <div className="max-w-[1400px] mx-auto px-4">
-        <div className="grid grid-cols-3 gap-8 mb-8 text-gray-400 text-sm">
-          <div>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-black text-lg"
-                style={{ border: `2px solid ${t.gold}` }}>仁</div>
-              <div>
-                <div className="text-white font-bold text-sm">인하대학교 총동창회</div>
-                <div className="text-xs" style={{ color: t.gold }}>INHA UNIVERSITY</div>
-              </div>
-            </div>
-            <p className="text-sm font-medium" style={{ color: t.gold }}>친목공영 | 모교후원 | 후진육영</p>
-          </div>
-          <div>
-            <h4 className="text-white font-semibold text-sm mb-3">사무국</h4>
-            <address className="not-italic text-sm space-y-1">
-              <p>(22188) 인천광역시 미추홀구 독배로 311</p>
-              <p>비젼프라자 901호</p>
-              <p>TEL 032-887-2345 | FAX 032-887-2211</p>
-              <p>inha@inhain.com</p>
-            </address>
-          </div>
-          <div>
-            <h4 className="text-white font-semibold text-sm mb-3">회비 계좌</h4>
-            <div className="text-sm space-y-1.5">
-              <p>우리은행 256-454416-13-001</p>
-              <p className="text-xs text-gray-500">(예금주: 인하대학교 총동창회)</p>
-            </div>
-          </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="bg-white rounded-lg border border-gray-200 p-5">
+        <div className="flex items-center justify-between border-b-2 border-[#003876] pb-3 mb-1">
+          <h3 className="text-[15px] font-bold text-gray-800">단위동문회 소식</h3>
+          <Link href="/community/local-news" className="text-xs text-gray-400 hover:text-[#003876] transition-colors">더보기 +</Link>
         </div>
-        <div className="border-t pt-6 flex items-center justify-between text-xs text-gray-500"
-          style={{ borderColor: "rgba(255,255,255,0.1)" }}>
-          <p>Copyright © 2026 인하대학교 총동창회. All Rights Reserved.</p>
-          <div className="flex gap-4">
-            <span className="hover:text-white cursor-pointer">개인정보처리방침</span>
-            <span className="hover:text-white cursor-pointer">이용약관</span>
-          </div>
-        </div>
+        <PostList posts={localNews} />
       </div>
-    </footer>
+      <div className="bg-white rounded-lg border border-gray-200 p-5">
+        <div className="flex items-center justify-between border-b-2 border-[#003876] pb-3 mb-1">
+          <h3 className="text-[15px] font-bold text-gray-800">동문동정</h3>
+          <Link href="/news/press" className="text-xs text-gray-400 hover:text-[#003876] transition-colors">더보기 +</Link>
+        </div>
+        <PostList posts={alumniNews} />
+      </div>
+    </div>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* Page                                                                */
-/* ------------------------------------------------------------------ */
+/* ── 공지사항 + 경조사 ── */
+function NoticeCondolenceSection() {
+  const notices = MOCK_POSTS.filter((p) => p.type === "공지사항");
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="bg-white rounded-lg border border-gray-200 p-5">
+        <div className="flex items-center justify-between border-b-2 border-[#003876] pb-3 mb-1">
+          <h3 className="text-[15px] font-bold text-gray-800">공지사항</h3>
+          <Link href="/news/notice" className="text-xs text-gray-400 hover:text-[#003876] transition-colors">더보기 +</Link>
+        </div>
+        <PostList posts={notices} />
+      </div>
+      <div className="bg-white rounded-lg border border-gray-200 p-5">
+        <div className="flex items-center justify-between border-b-2 border-[#003876] pb-3 mb-1">
+          <h3 className="text-[15px] font-bold text-gray-800">경조사 알림</h3>
+          <Link href="/community/condolence" className="text-xs text-gray-400 hover:text-[#003876] transition-colors">더보기 +</Link>
+        </div>
+        <ul className="divide-y divide-gray-100">
+          {MOCK_CONDOLENCES.map((item) => (
+            <li key={item.id}>
+              <Link href="/community/condolence" className="flex items-center justify-between py-2.5 gap-2 group hover:bg-gray-50 px-2 -mx-2 transition-colors rounded">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-sm shrink-0">{item.type === "경사" ? "🎉" : "🕯️"}</span>
+                  <span className="text-sm text-gray-600 group-hover:text-[#003876] truncate">{item.name} · {item.content}</span>
+                </div>
+                {item.event_date && <span className="shrink-0 text-xs text-gray-400">{formatDate(item.event_date)}</span>}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
 
+/* ── 하단: 슬라이드 광고 + 동문기업 ── */
+function BottomSection() {
+  return (
+    <section className="bg-white py-12 border-t border-gray-100">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+
+          {/* 슬라이드 광고 */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-bold text-gray-800">슬라이드 광고</h3>
+              <span className="text-xs text-gray-400">어드민에서 관리</span>
+            </div>
+            <AdSlider slides={MOCK_AD_SLIDES} />
+          </div>
+
+          {/* 동문기업 (한국외대 스타일) */}
+          <div className="lg:col-span-2">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-900">동문기업</h3>
+              <Link href="/network/companies" className="text-sm text-gray-500 hover:text-[#003876] transition-colors">
+                더보기 →
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {PARTNER_COMPANIES.map((co, i) => (
+                <div
+                  key={i}
+                  className="border border-gray-200 rounded-lg overflow-hidden hover:border-[#003876] hover:shadow-sm transition-all cursor-pointer group"
+                >
+                  <div className="h-28 bg-gray-50 flex items-center justify-center border-b border-gray-100 group-hover:bg-blue-50/30 transition-colors">
+                    <div className="w-16 h-16 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center">
+                      <span className="text-xl font-black text-[#003876]">{co.initial}</span>
+                    </div>
+                  </div>
+                  <div className="px-4 py-3 text-center">
+                    <p className="text-sm font-bold text-gray-800 group-hover:text-[#003876] transition-colors leading-snug">{co.name}</p>
+                    <p className="text-xs text-gray-400 mt-1">{co.person}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── Page ── */
 export default function PreviewPage() {
-  const [activeTheme, setActiveTheme] = useState(0);
-  const t = themes[activeTheme];
-
   return (
     <div className="min-h-screen font-[Pretendard,system-ui,sans-serif]">
-      <ColorSwitcher active={activeTheme} onSelect={setActiveTheme} />
 
-      <div className="bg-amber-50 border-b border-amber-200 py-2 px-4 text-center text-xs text-amber-700 font-medium">
-        🎨 컬러 시안 미리보기 — 실제 사이트에 반영되지 않습니다. 우측 패널에서 테마를 선택하세요.
+      <GNB />
+
+      {/* 히어로 + 퀵메뉴 — 히어로 배경과 자연스럽게 연결 */}
+      <div className="relative">
+        <HeroBanner banners={[]} />
+        {/* 하단 그라디언트 페이드 (퀵메뉴 영역까지 자연스럽게) */}
+        <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-black/65 to-transparent z-[15] pointer-events-none" />
+        {/* 퀵메뉴 — bottom-14로 약간 위로, 전체 흰색 테두리 포함 */}
+        <div className="absolute bottom-10 left-0 right-0 z-20">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="grid grid-cols-5 border border-white/30 divide-x divide-white/30 rounded-sm">
+              {QUICK_ITEMS.map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  className="flex flex-col items-center gap-2 py-4 md:py-5 hover:bg-white/10 transition-all"
+                >
+                  <span className="text-2xl md:text-3xl drop-shadow-lg">{item.icon}</span>
+                  <span className="text-white text-[11px] md:text-sm font-medium text-center leading-tight drop-shadow-md px-1">
+                    {item.label}
+                  </span>
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
-      <PreviewGNB t={t} />
-      <PreviewHero t={t} />
+      <BizSection />
 
-      {/* 히어로 아래부터: 사이드 배너 + 메인 콘텐츠 */}
-      <WithSideBanners>
-        <PreviewQuickMenu t={t} />
-        <PreviewBizSection t={t} />
-        <PreviewNewsSection t={t} />
-        <PreviewDonation t={t} />
-        <CardNewsBannerStrip t={t} />
-      </WithSideBanners>
+      {/* 뉴스 + 오른쪽 광고 */}
+      <section className="py-10 bg-gray-50">
+        <div className="max-w-[1400px] mx-auto px-4">
+          <div className="flex gap-5 items-start">
+            <div className="flex-1 min-w-0 space-y-6">
+              <TabNewsSection />
+              <NoticeCondolenceSection />
+            </div>
+            <aside className="hidden lg:flex flex-col gap-3 shrink-0 sticky top-20 self-start">
+              {SIDE_BANNERS_RIGHT.map((b, i) => (
+                <SideBannerItem key={i} {...b} />
+              ))}
+            </aside>
+          </div>
+        </div>
+      </section>
 
-      <PreviewFooter t={t} />
+      <DonationDashboard />
+      <BottomSection />
+      <Footer />
     </div>
   );
 }

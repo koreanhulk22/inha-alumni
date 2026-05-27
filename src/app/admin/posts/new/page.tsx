@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createPost } from "../../actions";
 import { MediaUploadWidget } from "@/components/admin/MediaUploadWidget";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 
 const POST_TYPES = [
   "공지사항", "총동창회소식", "단위동문회소식", "모교소식",
@@ -16,6 +17,7 @@ export default function NewPostPage() {
   const [error, setError] = useState("");
   const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [attachments, setAttachments] = useState<string[]>([]);
+  const [content, setContent] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -24,6 +26,7 @@ export default function NewPostPage() {
     try {
       const formData = new FormData(e.currentTarget);
       formData.set("image_url", thumbnailUrl);
+      formData.set("content", content);
       attachments.forEach((url) => formData.append("attachments", url));
       await createPost(formData);
       router.push("/admin?tab=posts");
@@ -72,7 +75,7 @@ export default function NewPostPage() {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">본문 *</label>
-          <textarea name="content" required rows={12} placeholder="본문 내용을 입력하세요" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#003876] resize-y" />
+          <RichTextEditor value={content} onChange={setContent} />
         </div>
 
         <div className="flex items-center gap-2">

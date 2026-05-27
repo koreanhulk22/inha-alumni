@@ -225,3 +225,101 @@ export async function deleteVerification(id: string) {
   if (error) throw new Error(error.message);
   revalidatePath("/admin");
 }
+
+export async function createAdSlide(formData: FormData) {
+  await requireAdmin();
+  const admin = createAdminClient();
+  const { error } = await admin.from("ad_slides").insert({
+    title: formData.get("title") as string,
+    label: formData.get("label") as string || "총동창회 업무 제휴 협력 기업",
+    image_url: formData.get("image_url") as string || null,
+    link_url: formData.get("link_url") as string || null,
+    sort_order: parseInt(formData.get("sort_order") as string) || 0,
+    is_active: true,
+  });
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin");
+  revalidatePath("/");
+}
+
+export async function updateAdSlide(id: string, formData: FormData) {
+  await requireAdmin();
+  const admin = createAdminClient();
+  const { error } = await admin.from("ad_slides").update({
+    title: formData.get("title") as string,
+    label: formData.get("label") as string || "총동창회 업무 제휴 협력 기업",
+    image_url: formData.get("image_url") as string || null,
+    link_url: formData.get("link_url") as string || null,
+    sort_order: parseInt(formData.get("sort_order") as string) || 0,
+  }).eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin");
+  revalidatePath("/");
+}
+
+export async function deleteAdSlide(id: string) {
+  await requireAdmin();
+  const admin = createAdminClient();
+  const { error } = await admin.from("ad_slides").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin");
+  revalidatePath("/");
+}
+
+export async function toggleAdSlide(id: string, isActive: boolean) {
+  await requireAdmin();
+  const admin = createAdminClient();
+  const { error } = await admin.from("ad_slides").update({ is_active: isActive }).eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin");
+  revalidatePath("/");
+}
+
+export async function createSideBanner(formData: FormData) {
+  await requireAdmin();
+  const admin = createAdminClient();
+  const { error } = await admin.from("side_banners").insert({
+    image_url: formData.get("image_url") as string || null,
+    link_url: formData.get("link_url") as string || null,
+    alt_text: formData.get("alt_text") as string || "AD",
+    position: formData.get("position") as string || "left",
+    sort_order: parseInt(formData.get("sort_order") as string) || 0,
+    is_active: true,
+  });
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin");
+  revalidatePath("/");
+}
+
+export async function updateSideBanner(id: string, formData: FormData) {
+  await requireAdmin();
+  const admin = createAdminClient();
+  const { error } = await admin.from("side_banners").update({
+    image_url: formData.get("image_url") as string || null,
+    link_url: formData.get("link_url") as string || null,
+    alt_text: formData.get("alt_text") as string || "AD",
+    position: formData.get("position") as string || "left",
+    sort_order: parseInt(formData.get("sort_order") as string) || 0,
+  }).eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin");
+  revalidatePath("/");
+}
+
+export async function deleteSideBanner(id: string) {
+  await requireAdmin();
+  const admin = createAdminClient();
+  const { error } = await admin.from("side_banners").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin");
+  revalidatePath("/");
+}
+
+export async function toggleSideBanner(id: string, isActive: boolean) {
+  await requireAdmin();
+  const admin = createAdminClient();
+  const { error } = await admin.from("side_banners").update({ is_active: isActive }).eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin");
+  revalidatePath("/");
+}

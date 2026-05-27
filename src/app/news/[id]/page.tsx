@@ -162,9 +162,9 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
           </div>
         </div>
 
-        <div className="px-6 py-8 min-h-48">
-          <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{post.content}</p>
-        </div>
+        <div className="px-6 py-8 min-h-48 prose prose-sm max-w-none prose-img:w-full prose-img:rounded-lg prose-img:my-4 prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-relaxed"
+          dangerouslySetInnerHTML={{ __html: post.content }}
+        />
 
         {post.attachments && post.attachments.length > 0 && (
           <AttachmentsSection attachments={post.attachments} />
