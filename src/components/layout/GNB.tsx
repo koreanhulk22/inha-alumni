@@ -141,8 +141,8 @@ export function GNB() {
               priority
             />
             <div className="hidden sm:block">
-              <div className="text-[#003876] font-bold text-lg leading-tight whitespace-nowrap">인하대학교 총동창회</div>
-              <div className="text-[#003876] text-[11px] leading-tight tracking-wide whitespace-nowrap">Inha University Alumni Association</div>
+              <div className="text-[#003876] font-bold text-xl leading-tight whitespace-nowrap">인하대학교 총동창회</div>
+              <div className="text-[#003876] text-xs leading-tight tracking-wide whitespace-nowrap">Inha University Alumni Association</div>
             </div>
           </Link>
 
