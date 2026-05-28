@@ -129,20 +129,20 @@ export function GNB() {
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex items-center h-20">
+      <div className="max-w-[1440px] mx-auto px-4">
+        <div className="flex items-center h-24">
           {/* 로고 */}
           <Link href="/" className="flex items-center gap-3 mr-8 shrink-0">
             <Image
               src="/images/inha-emblem.png"
               alt="인하대학교 총동창회"
-              width={54}
-              height={54}
+              width={68}
+              height={68}
               priority
             />
             <div className="hidden sm:block">
-              <div className="text-[#003876] font-bold text-base leading-tight whitespace-nowrap">인하대학교 총동창회</div>
-              <div className="text-[#003876] text-[10px] leading-tight tracking-wide whitespace-nowrap">Inha University Alumni Association</div>
+              <div className="text-[#003876] font-bold text-lg leading-tight whitespace-nowrap">인하대학교 총동창회</div>
+              <div className="text-[#003876] text-[11px] leading-tight tracking-wide whitespace-nowrap">Inha University Alumni Association</div>
             </div>
           </Link>
 
@@ -156,11 +156,11 @@ export function GNB() {
                 onMouseLeave={() => setActiveMenu(null)}
               >
                 {"external" in menu && menu.external ? (
-                  <a href={menu.href} className="px-3 py-5 text-sm font-medium text-gray-700 hover:text-[#003876] whitespace-nowrap block">
+                  <a href={menu.href} className="px-3 py-6 text-base font-medium text-gray-700 hover:text-[#003876] whitespace-nowrap block">
                     {menu.label}
                   </a>
                 ) : (
-                  <Link href={menu.href} className="px-3 py-5 text-sm font-medium text-gray-700 hover:text-[#003876] whitespace-nowrap block">
+                  <Link href={menu.href} className="px-3 py-6 text-base font-medium text-gray-700 hover:text-[#003876] whitespace-nowrap block">
                     {menu.label}
                   </Link>
                 )}

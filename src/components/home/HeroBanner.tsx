@@ -68,7 +68,7 @@ export function HeroBanner({ banners }: Props) {
 
   return (
     <section
-      className="relative h-[calc(100vh-80px)] overflow-hidden"
+      className="relative h-[580px] lg:h-[640px] overflow-hidden"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -87,6 +87,8 @@ export function HeroBanner({ banners }: Props) {
                 fill
                 className="object-cover"
                 priority={i === 0}
+                quality={95}
+                sizes="100vw"
               />
               <div className="absolute inset-0 bg-[#003876]/55" />
             </>
