@@ -62,7 +62,7 @@ export function HeroBanner({ banners }: Props) {
 
   useEffect(() => {
     if (paused || slides.length <= 1) return;
-    const timer = setInterval(next, 5000);
+    const timer = setInterval(next, 8000);
     return () => clearInterval(timer);
   }, [paused, next, slides.length]);
 
