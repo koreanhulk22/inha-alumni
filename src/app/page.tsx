@@ -218,6 +218,8 @@ export default async function HomePage() {
           </div>
         </section>
 
+        <DonationDashboard />
+
         {/* 슬라이드 광고 + 동문기업 */}
         <section className="bg-white py-12 border-t border-gray-100">
           <div className="max-w-7xl mx-auto px-4">
@@ -259,8 +261,6 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
-
-        <DonationDashboard />
       </main>
       <Footer />
     </div>
