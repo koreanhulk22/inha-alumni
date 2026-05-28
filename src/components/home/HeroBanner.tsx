@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -26,6 +26,7 @@ const bgGradients = [
 export function HeroBanner({ banners }: Props) {
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
+  const touchStartX = useRef<number | null>(null);
 
   const slides = banners.length > 0 ? banners : [
     {
@@ -71,6 +72,13 @@ export function HeroBanner({ banners }: Props) {
       className="relative h-[calc(100vh-96px)] overflow-hidden"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
+      onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+      onTouchEnd={(e) => {
+        if (touchStartX.current === null) return;
+        const diff = touchStartX.current - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 50) diff > 0 ? next() : prev();
+        touchStartX.current = null;
+      }}
     >
       {slides.map((slide, i) => (
         <div
@@ -122,7 +130,7 @@ export function HeroBanner({ banners }: Props) {
 
       {slides.length > 1 && (
         <>
-          <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+          <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-30">
             {slides.map((_, i) => (
               <button
                 key={i}
@@ -137,20 +145,20 @@ export function HeroBanner({ banners }: Props) {
 
           <button
             onClick={prev}
-            className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 bg-white/20 hover:bg-white/35 rounded-full flex items-center justify-center text-white text-lg sm:text-xl transition-colors z-10"
+            className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 bg-white/20 hover:bg-white/35 rounded-full flex items-center justify-center text-white text-lg sm:text-xl transition-colors z-30"
             aria-label="이전"
           >
             ‹
           </button>
           <button
             onClick={next}
-            className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 bg-white/20 hover:bg-white/35 rounded-full flex items-center justify-center text-white text-lg sm:text-xl transition-colors z-10"
+            className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 bg-white/20 hover:bg-white/35 rounded-full flex items-center justify-center text-white text-lg sm:text-xl transition-colors z-30"
             aria-label="다음"
           >
             ›
           </button>
 
-          <div className="absolute bottom-4 sm:bottom-6 right-4 sm:right-6 z-10 text-white/60 text-xs tabular-nums">
+          <div className="absolute bottom-4 sm:bottom-6 right-4 sm:right-6 z-30 text-white/60 text-xs tabular-nums">
             {current + 1} / {slides.length}
           </div>
         </>
