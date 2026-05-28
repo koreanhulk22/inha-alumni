@@ -100,19 +100,20 @@ function SideBannerAdItem({ banner }: { banner: { id: string; image_url: string 
   return (
     <a
       href={banner.link_url ?? "#"}
-      target="_blank"
+      target={banner.link_url ? "_blank" : undefined}
       rel="noopener noreferrer"
-      className="block relative w-[120px] h-[200px] rounded-lg overflow-hidden border-2 border-[#003876] bg-white hover:opacity-90 transition-opacity"
+      className="block relative w-[120px] h-[200px] rounded-lg overflow-hidden border border-gray-200 bg-white hover:border-[#003876] hover:shadow-sm transition-all"
     >
       {banner.image_url ? (
         <Image src={banner.image_url} alt={banner.alt_text ?? "AD"} fill className="object-cover" />
       ) : (
-        <div className="w-full h-full bg-white flex flex-col items-center justify-center gap-1">
-          <span className="text-[#003876] text-xs font-semibold">AD</span>
-          <span className="text-gray-300 text-[10px] text-center px-2">{banner.alt_text ?? "광고"}</span>
+        <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gray-50">
+          <div className="w-8 h-8 rounded-full bg-[#003876]/10 flex items-center justify-center">
+            <span className="text-[#003876] text-[10px] font-bold">AD</span>
+          </div>
+          <span className="text-gray-400 text-[9px] text-center leading-relaxed px-2 whitespace-pre-line">{"광고 문의\n032-887-2345"}</span>
         </div>
       )}
-      <span className="absolute bottom-1 right-1 text-[9px] bg-black/50 text-white px-1 rounded">AD</span>
     </a>
   );
 }
