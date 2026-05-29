@@ -69,7 +69,7 @@ export function HeroBanner({ banners }: Props) {
 
   return (
     <section
-      className="relative h-[calc(100vh-96px)] overflow-hidden"
+      className="relative h-[calc(100vh-64px)] lg:h-[calc(100vh-96px)] overflow-hidden"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
