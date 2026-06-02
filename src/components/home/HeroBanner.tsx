@@ -106,9 +106,6 @@ export function HeroBanner({ banners }: Props) {
 
           <div className="relative z-10 max-w-7xl mx-auto px-5 h-full flex items-center">
             <div className="text-white max-w-2xl">
-              <p className="text-[#C8A951] text-xs sm:text-sm font-medium mb-2 sm:mb-3 tracking-widest uppercase">
-                인하대학교 총동창회
-              </p>
               <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold mb-3 sm:mb-4 leading-tight">
                 {slide.title}
               </h2>
