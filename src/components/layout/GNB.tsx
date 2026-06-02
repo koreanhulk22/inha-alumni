@@ -27,6 +27,7 @@ const menus = [
       { label: "주요행사", href: "/news/events" },
       { label: "동창회보", href: "/news/newsletter" },
       { label: "동문보도", href: "/news/press" },
+      { label: "영상보기", href: "/news/videos" },
       { label: "포토 갤러리", href: "/news/gallery" },
     ],
   },

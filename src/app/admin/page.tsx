@@ -23,9 +23,12 @@ import SMSTab from "./sms/SMSTab";
 import GalleryTab from "./gallery/GalleryTab";
 import NewsletterTab from "./newsletter/NewsletterTab";
 import SettingsTab from "./settings/SettingsTab";
+import CalendarTab from "./calendar/CalendarTab";
+import VideosTab from "./videos/VideosTab";
+import NewsletterTemplateTab from "./newsletter-template/NewsletterTemplateTab";
 
 // ─── 타입 ──────────────────────────────────────────────────────────
-type Tab = "dashboard" | "posts" | "board" | "users" | "businesses" | "verifications" | "donations" | "condolences" | "banners" | "ad_slides" | "side_banners" | "sms" | "gallery" | "newsletter" | "settings";
+type Tab = "dashboard" | "posts" | "board" | "users" | "businesses" | "verifications" | "donations" | "condolences" | "banners" | "ad_slides" | "side_banners" | "sms" | "gallery" | "newsletter" | "newsletter_template" | "calendar" | "videos" | "settings";
 
 // ─── 대시보드 ──────────────────────────────────────────────────────
 async function DashboardTab() {
@@ -655,6 +658,9 @@ export default async function AdminPage({
   if (tab === "side_banners") return <SideBannersTab />;
   if (tab === "gallery") return <GalleryTab />;
   if (tab === "newsletter") return <NewsletterTab />;
+  if (tab === "newsletter_template") return <NewsletterTemplateTab />;
+  if (tab === "calendar") return <CalendarTab />;
+  if (tab === "videos") return <VideosTab />;
   if (tab === "sms") return <SMSTab />;
   if (tab === "settings") return <SettingsTab />;
   return <DashboardTab />;

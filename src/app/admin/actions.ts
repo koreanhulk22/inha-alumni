@@ -323,3 +323,110 @@ export async function toggleSideBanner(id: string, isActive: boolean) {
   revalidatePath("/admin");
   revalidatePath("/");
 }
+
+// ===== 회원 승인 =====
+export async function approveUser(id: string, approved: boolean) {
+  await requireAdmin();
+  const admin = createAdminClient();
+  const { error } = await admin.from("users").update({ is_alumni_verified: approved }).eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin");
+}
+
+// ===== 행사 달력 =====
+export async function createCalendarEvent(formData: FormData) {
+  await requireAdmin();
+  const admin = createAdminClient();
+  const { error } = await admin.from("calendar_events").insert({
+    title: formData.get("title") as string,
+    description: formData.get("description") as string || null,
+    start_date: formData.get("start_date") as string,
+    end_date: formData.get("end_date") as string || null,
+    location: formData.get("location") as string || null,
+    category: formData.get("category") as string || "행사",
+    color: formData.get("color") as string || "#003876",
+    is_active: true,
+  });
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin");
+  revalidatePath("/news/events");
+}
+
+export async function updateCalendarEvent(id: string, formData: FormData) {
+  await requireAdmin();
+  const admin = createAdminClient();
+  const { error } = await admin.from("calendar_events").update({
+    title: formData.get("title") as string,
+    description: formData.get("description") as string || null,
+    start_date: formData.get("start_date") as string,
+    end_date: formData.get("end_date") as string || null,
+    location: formData.get("location") as string || null,
+    category: formData.get("category") as string || "행사",
+    color: formData.get("color") as string || "#003876",
+  }).eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin");
+  revalidatePath("/news/events");
+}
+
+export async function deleteCalendarEvent(id: string) {
+  await requireAdmin();
+  const admin = createAdminClient();
+  await admin.from("calendar_events").delete().eq("id", id);
+  revalidatePath("/admin");
+  revalidatePath("/news/events");
+}
+
+export async function toggleCalendarEnabled(enabled: boolean) {
+  await requireAdmin();
+  const admin = createAdminClient();
+  await admin.from("site_settings").update({ value: enabled ? "true" : "false" }).eq("key", "calendar_enabled");
+  revalidatePath("/admin");
+  revalidatePath("/news/events");
+}
+
+// ===== 유튜브 영상 =====
+export async function createVideo(formData: FormData) {
+  await requireAdmin();
+  const admin = createAdminClient();
+  const youtubeUrl = formData.get("youtube_url") as string;
+  const youtubeId = extractYoutubeId(youtubeUrl) ?? youtubeUrl;
+  const { error } = await admin.from("videos").insert({
+    title: formData.get("title") as string,
+    description: formData.get("description") as string || null,
+    youtube_id: youtubeId,
+    is_active: true,
+    sort_order: parseInt(formData.get("sort_order") as string) || 0,
+    published_at: formData.get("published_at") as string || null,
+  });
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin");
+  revalidatePath("/news/videos");
+}
+
+export async function deleteVideo(id: string) {
+  await requireAdmin();
+  const admin = createAdminClient();
+  await admin.from("videos").delete().eq("id", id);
+  revalidatePath("/admin");
+  revalidatePath("/news/videos");
+}
+
+export async function toggleVideo(id: string, isActive: boolean) {
+  await requireAdmin();
+  const admin = createAdminClient();
+  await admin.from("videos").update({ is_active: isActive }).eq("id", id);
+  revalidatePath("/admin");
+  revalidatePath("/news/videos");
+}
+
+function extractYoutubeId(url: string): string | null {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+  ];
+  for (const p of patterns) {
+    const m = url.match(p);
+    if (m) return m[1];
+  }
+  return null;
+}
