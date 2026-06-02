@@ -16,6 +16,8 @@ const MONTH_LABELS: Record<number, string> = {
 
 export default async function NewsletterPage() {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   const { data: items } = await supabase
     .from("newsletters")
     .select("id, title, issue_number, year, month, pdf_url, cover_image_url")
@@ -36,7 +38,15 @@ export default async function NewsletterPage() {
           <p className="text-sm text-gray-400 mt-1">인하대학교 총동창회 기관지 — 연 4회 발행</p>
         </div>
 
-        {newsletters.length > 0 ? (
+        {!user ? (
+          <div className="py-16 text-center">
+            <p className="text-sm font-semibold text-gray-700 mb-1">회원 전용 서비스입니다</p>
+            <p className="text-xs text-gray-400 mb-4">동창회보 PDF는 인증 회원만 열람할 수 있습니다.</p>
+            <a href="/auth/login?redirect=/news/newsletter" className="inline-block px-6 py-2.5 bg-[#003876] text-white text-sm font-semibold rounded-lg hover:bg-[#002a5c] transition-colors">
+              로그인하기
+            </a>
+          </div>
+        ) : newsletters.length > 0 ? (
           <div className="divide-y divide-gray-100">
             {newsletters.map((item) => (
               <div key={item.id} className="px-6 py-5 hover:bg-gray-50 transition-colors">
