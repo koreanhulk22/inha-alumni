@@ -36,8 +36,11 @@ export default async function CondolencePage() {
               }`}>
                 {event.type}
               </span>
-              <p className="flex-1 text-sm text-gray-800">{event.content}</p>
-              <span className="shrink-0 text-xs text-gray-400">{formatDate(event.created_at)}</span>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-gray-800">{event.name}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{event.content}</p>
+              </div>
+              <span className="shrink-0 text-xs text-gray-400">{formatDate(event.event_date ?? event.created_at)}</span>
             </div>
           ))}
           {(!events || events.length === 0) && (

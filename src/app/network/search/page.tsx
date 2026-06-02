@@ -12,6 +12,11 @@ const sideMenus = [
   { label: "업종별 현황", href: "/network/industry" },
 ];
 
+function maskName(name: string): string {
+  if (!name || name.length <= 1) return name;
+  return name[0] + "○".repeat(name.length - 1);
+}
+
 export default function NetworkSearchPage() {
   const [user, setUser] = useState<User | null>(null);
   const [form, setForm] = useState({ name: "", department: "", graduation_year: "" });
@@ -97,7 +102,7 @@ export default function NetworkSearchPage() {
                     {r.name[0]}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-800">{r.name}</p>
+                    <p className="text-sm font-medium text-gray-800">{maskName(r.name)}</p>
                     <p className="text-xs text-gray-400">
                       {[r.department, r.graduation_year ? `${r.graduation_year}학번` : null].filter(Boolean).join(" · ")}
                     </p>
