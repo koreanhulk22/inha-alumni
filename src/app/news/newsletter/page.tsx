@@ -18,6 +18,13 @@ export default async function NewsletterPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
+  let isApproved = false;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("users").select("is_alumni_verified").eq("id", user.id).single();
+    isApproved = profile?.is_alumni_verified ?? false;
+  }
+
   const { data: items } = await supabase
     .from("newsletters")
     .select("id, title, issue_number, year, month, pdf_url, cover_image_url")
@@ -41,10 +48,15 @@ export default async function NewsletterPage() {
         {!user ? (
           <div className="py-16 text-center">
             <p className="text-sm font-semibold text-gray-700 mb-1">회원 전용 서비스입니다</p>
-            <p className="text-xs text-gray-400 mb-4">동창회보 PDF는 인증 회원만 열람할 수 있습니다.</p>
+            <p className="text-xs text-gray-400 mb-4">동창회보 PDF는 승인된 회원만 열람할 수 있습니다.</p>
             <a href="/auth/login?redirect=/news/newsletter" className="inline-block px-6 py-2.5 bg-[#003876] text-white text-sm font-semibold rounded-lg hover:bg-[#002a5c] transition-colors">
               로그인하기
             </a>
+          </div>
+        ) : !isApproved ? (
+          <div className="py-16 text-center">
+            <p className="text-sm font-semibold text-amber-700 mb-1">승인 대기 중</p>
+            <p className="text-xs text-gray-400">관리자 승인 후 동창회보 PDF를 열람하실 수 있습니다.</p>
           </div>
         ) : newsletters.length > 0 ? (
           <div className="divide-y divide-gray-100">

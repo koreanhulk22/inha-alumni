@@ -19,13 +19,25 @@ function maskName(name: string): string {
 
 export default function NetworkSearchPage() {
   const [user, setUser] = useState<User | null>(null);
+  const [isApproved, setIsApproved] = useState(false);
   const [form, setForm] = useState({ name: "", department: "", graduation_year: "" });
   const [results, setResults] = useState<{ id: string; name: string; department: string | null; graduation_year: number | null }[]>([]);
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    createClient().auth.getUser().then(({ data }) => setUser(data.user));
+    const supabase = createClient();
+    supabase.auth.getUser().then(async ({ data }) => {
+      setUser(data.user);
+      if (data.user) {
+        const { data: profile } = await supabase
+          .from("users")
+          .select("is_alumni_verified")
+          .eq("id", data.user.id)
+          .single();
+        setIsApproved(profile?.is_alumni_verified ?? false);
+      }
+    });
   }, []);
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -61,6 +73,11 @@ export default function NetworkSearchPage() {
               <a href="/auth/login?redirect=/network/search" className="inline-block px-5 py-2 bg-[#003876] text-white text-sm rounded-full hover:bg-[#002a5c] transition-colors">
                 로그인하기
               </a>
+            </div>
+          ) : !isApproved ? (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 text-center">
+              <p className="text-sm font-semibold text-amber-800 mb-1">승인 대기 중</p>
+              <p className="text-xs text-gray-500">관리자 승인 후 동문 검색을 이용하실 수 있습니다.</p>
             </div>
           ) : (
             <form onSubmit={handleSearch} className="space-y-4">

@@ -23,24 +23,24 @@ export default async function MyPage() {
         <div className="max-w-2xl mx-auto px-4 space-y-4">
           <h1 className="text-2xl font-bold text-[#003876]">마이페이지</h1>
 
-          {/* 동문 인증 상태 배너 */}
+          {/* 가입 승인 상태 배너 */}
           {profile?.is_alumni_verified ? (
             <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3">
               <span className="text-green-500 text-xl">✓</span>
               <div>
-                <p className="text-sm font-semibold text-green-700">동문 인증 완료</p>
+                <p className="text-sm font-semibold text-green-700">승인 완료</p>
                 <p className="text-xs text-green-600 mt-0.5">모든 서비스를 이용하실 수 있습니다.</p>
               </div>
             </div>
           ) : (
-            <div className="bg-[#E8F0FE] border border-[#003876]/20 rounded-xl p-4">
-              <p className="text-sm font-semibold text-[#003876] mb-1">동문 인증이 필요합니다</p>
-              <p className="text-xs text-gray-600 mb-3">동문 인증 후 동문 검색, 게시글 작성 등 모든 서비스를 이용하실 수 있습니다.</p>
-              <div className="text-xs text-gray-500 space-y-1">
-                <p>· 인증 방법: 사무국 직접 방문 또는 이메일 신청</p>
-                <p>· 이메일: <strong>inha@inhain.com</strong></p>
-                <p>· 전화: <strong>032-887-2345</strong></p>
-                <p>· 졸업증명서 또는 학위증 사본 첨부 필요</p>
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-amber-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <p className="text-sm font-semibold text-amber-800">가입 승인 대기 중</p>
+                <p className="text-xs text-amber-700 mt-0.5">관리자 승인 후 동문 검색, 동창회보 등 전체 서비스 이용이 가능합니다.</p>
+                <p className="text-xs text-gray-500 mt-1.5">문의: inha@inhain.com / 032-887-2345</p>
               </div>
             </div>
           )}
