@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { SubPageLayout } from "@/components/layout/SubPageLayout";
 import Link from "next/link";
+import { NoticeSearchBar } from "./NoticeSearchBar";
 
 const sideMenus = [
   { label: "공지사항", href: "/news/notice" },
@@ -10,15 +11,28 @@ const sideMenus = [
   { label: "포토 갤러리", href: "/news/gallery" },
 ];
 
-export default async function NoticePage() {
+export default async function NoticePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { q } = await searchParams;
+  const query = (q ?? "").trim();
+
   const supabase = await createClient();
 
-  const { data: posts } = await supabase
+  let dbQuery = supabase
     .from("posts")
     .select("id, type, title, summary, created_at, is_pinned, views")
     .in("type", ["공지사항", "총동창회소식"])
     .order("is_pinned", { ascending: false })
     .order("created_at", { ascending: false });
+
+  if (query) {
+    dbQuery = dbQuery.or(`title.ilike.%${query}%,summary.ilike.%${query}%`);
+  }
+
+  const { data: posts } = await dbQuery;
 
   const formatDate = (dateStr: string) =>
     new Date(dateStr).toLocaleDateString("ko-KR", {
@@ -34,9 +48,19 @@ export default async function NoticePage() {
       currentPath="/news/notice"
     >
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="px-6 py-5 border-b border-gray-200">
-          <h1 className="text-xl font-bold text-[#003876]">공지사항</h1>
+        <div className="px-6 py-5 border-b border-gray-200 flex items-center justify-between gap-4">
+          <h1 className="text-xl font-bold text-[#003876] shrink-0">공지사항</h1>
+          <NoticeSearchBar defaultValue={query} />
         </div>
+
+        {query && (
+          <div className="px-6 py-3 bg-[#E8F0FE] border-b border-gray-200 text-sm text-[#003876]">
+            <span className="font-semibold">"{query}"</span> 검색 결과 {posts?.length ?? 0}건
+            <Link href="/news/notice" className="ml-3 text-xs text-gray-500 hover:underline">
+              초기화
+            </Link>
+          </div>
+        )}
 
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b border-gray-200">
@@ -76,7 +100,7 @@ export default async function NoticePage() {
             {(!posts || posts.length === 0) && (
               <tr>
                 <td colSpan={4} className="py-16 text-center text-gray-400">
-                  등록된 게시글이 없습니다.
+                  {query ? `"${query}"에 해당하는 게시글이 없습니다.` : "등록된 게시글이 없습니다."}
                 </td>
               </tr>
             )}
