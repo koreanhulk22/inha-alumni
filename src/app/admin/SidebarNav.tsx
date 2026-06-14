@@ -10,9 +10,10 @@ const navItems = [
   { label: "경조사 관리", tab: "condolences", icon: "🎊" },
   { label: "회원 가입 승인", tab: "users", icon: "👥" },
   { label: "동문인증 관리", tab: "verifications", icon: "🎓" },
+  { label: "메일함", tab: "messages", icon: "✉️" },
   { label: "행사 달력 관리", tab: "calendar", icon: "📅" },
   { label: "영상 관리", tab: "videos", icon: "🎬" },
-  { label: "뉴스레터 템플릿", tab: "newsletter_template", icon: "✉️" },
+  { label: "뉴스레터 템플릿", tab: "newsletter_template", icon: "📄" },
   { label: "업체 관리", tab: "businesses", icon: "🏢" },
   { label: "기부 내역", tab: "donations", icon: "💰" },
   { label: "배너 관리", tab: "banners", icon: "🖼️" },
@@ -20,7 +21,6 @@ const navItems = [
   { label: "사이드 배너", tab: "side_banners", icon: "📌" },
   { label: "갤러리 관리", tab: "gallery", icon: "📷" },
   { label: "동창회보 관리", tab: "newsletter", icon: "📰" },
-  { label: "문자 발송", tab: "sms", icon: "📱" },
   { label: "사이트 설정", tab: "settings", icon: "⚙️" },
 ];
 

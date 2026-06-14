@@ -19,7 +19,7 @@ import CondolencesTab from "./condolences/page";
 import BannersTab from "./banners/page";
 import AdSlidesTab from "./ad-slides/page";
 import SideBannersTab from "./side-banners/page";
-import SMSTab from "./sms/SMSTab";
+import MessagesTab from "./messages/MessagesTab";
 import GalleryTab from "./gallery/GalleryTab";
 import NewsletterTab from "./newsletter/NewsletterTab";
 import SettingsTab from "./settings/SettingsTab";
@@ -28,7 +28,7 @@ import VideosTab from "./videos/VideosTab";
 import NewsletterTemplateTab from "./newsletter-template/NewsletterTemplateTab";
 
 // ─── 타입 ──────────────────────────────────────────────────────────
-type Tab = "dashboard" | "posts" | "board" | "users" | "businesses" | "verifications" | "donations" | "condolences" | "banners" | "ad_slides" | "side_banners" | "sms" | "gallery" | "newsletter" | "newsletter_template" | "calendar" | "videos" | "settings";
+type Tab = "dashboard" | "posts" | "board" | "users" | "businesses" | "verifications" | "donations" | "condolences" | "banners" | "ad_slides" | "side_banners" | "messages" | "gallery" | "newsletter" | "newsletter_template" | "calendar" | "videos" | "settings";
 
 // ─── 대시보드 ──────────────────────────────────────────────────────
 async function DashboardTab() {
@@ -36,20 +36,22 @@ async function DashboardTab() {
   const [
     { count: postCount },
     { count: userCount },
+    { count: pendingApprovalCount },
     { count: pendingBusinessCount },
     { count: pendingBoardCount },
     { count: pendingVerificationCount },
   ] = await Promise.all([
     admin.from("posts").select("*", { count: "exact", head: true }),
     admin.from("users").select("*", { count: "exact", head: true }),
+    admin.from("users").select("*", { count: "exact", head: true }).eq("is_alumni_verified", false).eq("is_admin", false),
     admin.from("alumni_businesses").select("*", { count: "exact", head: true }).eq("is_approved", false),
     admin.from("posts").select("*", { count: "exact", head: true }).eq("type", "자유게시판").eq("is_board_approved", false),
     admin.from("alumni_verification_requests").select("*", { count: "exact", head: true }).eq("status", "pending"),
   ]);
 
   const stats = [
-    { label: "전체 게시글", value: postCount ?? 0, tab: "posts", color: "#003876" },
-    { label: "전체 회원", value: userCount ?? 0, tab: "users", color: "#0066CC" },
+    { label: "가입 승인 대기", value: pendingApprovalCount ?? 0, tab: "users", color: "#dc2626", highlight: true },
+    { label: "전체 회원", value: userCount ?? 0, tab: "users", color: "#003876" },
     { label: "동문인증 대기", value: pendingVerificationCount ?? 0, tab: "verifications", color: "#7C3AED" },
     { label: "게시판 승인 대기", value: pendingBoardCount ?? 0, tab: "board", color: "#ef4444" },
     { label: "업체 승인 대기", value: pendingBusinessCount ?? 0, tab: "businesses", color: "#C8A951" },
@@ -75,7 +77,15 @@ async function DashboardTab() {
       </div>
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {stats.map((stat) => (
-          <Link key={stat.label} href={`/admin?tab=${stat.tab}`} className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-sm transition-shadow">
+          <Link
+            key={stat.label}
+            href={`/admin?tab=${stat.tab}`}
+            className={`rounded-xl border p-5 hover:shadow-sm transition-shadow ${
+              stat.highlight && stat.value > 0
+                ? "bg-red-50 border-red-200"
+                : "bg-white border-gray-200"
+            }`}
+          >
             <div className="text-3xl font-bold" style={{ color: stat.color }}>{stat.value.toLocaleString()}</div>
             <div className="text-sm text-gray-500 mt-1">{stat.label}</div>
           </Link>
@@ -526,6 +536,11 @@ async function VerificationsTab() {
   );
 }
 
+function maskName(name: string): string {
+  if (!name || name.length < 2) return name;
+  return name[0] + "○".repeat(name.length - 1);
+}
+
 // ─── 기부 내역 ─────────────────────────────────────────────────────
 async function DonationsTab() {
   const admin = createAdminClient();
@@ -619,7 +634,7 @@ async function DonationsTab() {
                 return (
                   <tr key={d.id} className="hover:bg-gray-50">
                     <td className="py-3 px-4"><span className="text-xs bg-[#E8F0FE] text-[#003876] px-2 py-0.5 rounded">{d.fund_type}</span></td>
-                    <td className="py-3 px-4 text-gray-700">{d.is_anonymous ? "익명" : (d.donor_name || "-")}</td>
+                    <td className="py-3 px-4 text-gray-700">{d.is_anonymous ? "익명" : maskName(d.donor_name || "-")}</td>
                     <td className="py-3 px-4 text-right font-medium text-gray-800">{d.amount.toLocaleString()}원</td>
                     <td className="py-3 px-4 text-center"><span className={`text-xs px-2.5 py-1 rounded-full font-medium ${st.cls}`}>{st.text}</span></td>
                     <td className="py-3 px-4 text-gray-400 text-xs hidden md:table-cell max-w-40 truncate">{d.message || "-"}</td>
@@ -661,7 +676,7 @@ export default async function AdminPage({
   if (tab === "newsletter_template") return <NewsletterTemplateTab />;
   if (tab === "calendar") return <CalendarTab />;
   if (tab === "videos") return <VideosTab />;
-  if (tab === "sms") return <SMSTab />;
+  if (tab === "messages") return <MessagesTab />;
   if (tab === "settings") return <SettingsTab />;
   return <DashboardTab />;
 }

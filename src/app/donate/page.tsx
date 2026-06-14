@@ -1,3 +1,5 @@
+import { createClient } from "@/lib/supabase/server";
+import Link from "next/link";
 import { SubPageLayout } from "@/components/layout/SubPageLayout";
 import { DonateForm } from "@/components/donate/DonateForm";
 
@@ -7,7 +9,23 @@ const sideMenus = [
   { label: "동문회관 건립기금", href: "/donate?fund=건립기금" },
 ];
 
-export default function DonatePage() {
+const FUNDS = [
+  { name: "회비발전기금", account: "우리은행\n256-454416-13-001", color: "#003876", goal: 500000000, current: 120000000 },
+  { name: "장학기금", account: "하나은행\n748-910003-42904", color: "#0066CC", goal: 300000000, current: 85000000 },
+  { name: "동문회관 건립기금", account: "우리은행\n256-454416-13-001", color: "#C8A951", goal: 2000000000, current: 350000000 },
+];
+
+export default async function DonatePage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  let isApproved = false;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("users").select("is_alumni_verified").eq("id", user.id).single();
+    isApproved = profile?.is_alumni_verified ?? false;
+  }
+
   return (
     <SubPageLayout
       breadcrumbs={[{ label: "회비/기부" }, { label: "기부하기" }]}
@@ -15,13 +33,9 @@ export default function DonatePage() {
       currentPath="/donate"
     >
       <div className="space-y-6">
-        {/* 기금 현황 */}
+        {/* 기금 현황 — 항상 공개 */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[
-            { name: "회비발전기금", account: "우리은행\n256-454416-13-001", color: "#003876", goal: 500000000, current: 120000000 },
-            { name: "장학기금", account: "하나은행\n748-910003-42904", color: "#0066CC", goal: 300000000, current: 85000000 },
-            { name: "동문회관 건립기금", account: "우리은행\n256-454416-13-001", color: "#C8A951", goal: 2000000000, current: 350000000 },
-          ].map((fund) => (
+          {FUNDS.map((fund) => (
             <div key={fund.name} className="bg-white rounded-xl border border-gray-200 p-5">
               <div className="text-sm font-bold mb-1" style={{ color: fund.color }}>{fund.name}</div>
               <div className="text-2xl font-bold text-gray-800 mb-1">
@@ -44,18 +58,34 @@ export default function DonatePage() {
           ))}
         </div>
 
-        {/* 기부 폼 */}
-        <DonateForm />
-
-        {/* 계좌이체 안내 */}
-        <div className="bg-[#E8F0FE] rounded-xl p-6">
-          <h3 className="text-sm font-bold text-[#003876] mb-3">계좌이체 안내</h3>
-          <div className="space-y-2 text-sm text-gray-700">
-            <p>· <strong>회비발전기금</strong>: 우리은행 256-454416-13-001 (예금주: 인하대학교 총동창회)</p>
-            <p>· <strong>협찬금</strong>: 하나은행 748-910003-42904 (인하대학교총동창회)</p>
+        {/* 기부 폼 — 승인 회원 전용 */}
+        {!user ? (
+          <div className="bg-white rounded-xl border border-gray-200 py-14 text-center">
+            <p className="text-sm font-semibold text-gray-700 mb-1">회원 전용 서비스입니다</p>
+            <p className="text-xs text-gray-400 mb-5">기부 내역 조회 및 납부는 로그인 후 이용하실 수 있습니다.</p>
+            <Link href="/auth/login?redirect=/donate" className="inline-block px-6 py-2.5 bg-[#003876] text-white text-sm font-semibold rounded-lg hover:bg-[#002a5c] transition-colors">
+              로그인
+            </Link>
           </div>
-          <p className="text-xs text-gray-500 mt-3">입금 후 사무국(032-887-2345)으로 연락주시면 영수증을 발급해드립니다.</p>
-        </div>
+        ) : !isApproved ? (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl py-14 text-center">
+            <p className="text-sm font-semibold text-amber-800 mb-1">가입 승인 대기 중입니다</p>
+            <p className="text-xs text-amber-700">관리자 승인 후 기부 내역 조회 및 납부가 가능합니다.</p>
+          </div>
+        ) : (
+          <>
+            <DonateForm />
+            {/* 계좌이체 안내 */}
+            <div className="bg-[#E8F0FE] rounded-xl p-6">
+              <h3 className="text-sm font-bold text-[#003876] mb-3">계좌이체 안내</h3>
+              <div className="space-y-2 text-sm text-gray-700">
+                <p>· <strong>회비발전기금</strong>: 우리은행 256-454416-13-001 (예금주: 인하대학교 총동창회)</p>
+                <p>· <strong>협찬금</strong>: 하나은행 748-910003-42904 (인하대학교총동창회)</p>
+              </div>
+              <p className="text-xs text-gray-500 mt-3">입금 후 사무국(032-887-2345)으로 연락주시면 영수증을 발급해드립니다.</p>
+            </div>
+          </>
+        )}
       </div>
     </SubPageLayout>
   );
